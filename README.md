@@ -1,6 +1,6 @@
-# 📱 Challenges – Desarrollo Móvil
+# Challenges – Desarrollo Móvil
 
-## 👤 Estudiante  
+## Estudiante  
 **Nombre:** Juan Zuluaga  
 **Asignatura:** Desarrollo de Aplicaciones Móviles  
 **Docente:** Jonathan Lopez
