@@ -51,7 +51,11 @@ function App() {
   return (
     <div>
       <h1>Lista de contactos</h1>
-
+      <img
+        src="/logo.png"
+        alt="Logo de la aplicación"
+        style={{ width: "100px", height: "100px" }}
+      />
       <AddContact onAdd={addContact} />
 
       {loading ? (
