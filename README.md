@@ -72,12 +72,10 @@ export default defineConfig([
   },
 ])
 ```
-=======
 # Challenges – Desarrollo Móvil
 
 ## Estudiante  
 **Nombre:** Juan Zuluaga  
-**Asignatura:** Desarrollo de Aplicaciones Móviles  
+**Asignatura:** Desarrollo de Software para plataformas  
 **Docente:** Jonathan Lopez
 ---
->>>>>>> 6f7beb1833eacdd8c9838d4d33d44b5b6d4f7562
