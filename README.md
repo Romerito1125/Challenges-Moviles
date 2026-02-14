@@ -2,6 +2,6 @@
 
 ## Estudiante  
 **Nombre:** Juan Zuluaga  
-**Asignatura:** Desarrollo de Aplicaciones Móviles  
+**Asignatura:** Desarrollo de Software para plataformas moviles.
 **Docente:** Jonathan Lopez
 ---
