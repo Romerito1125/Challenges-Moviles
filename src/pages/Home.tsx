@@ -1,72 +1,97 @@
 import {
-  IonPage,
+  IonApp,
+  IonContent,
   IonHeader,
-  IonToolbar,
+  IonPage,
   IonTitle,
-  IonContent
-} from "@ionic/react";
+  IonToolbar,
+  IonSpinner
+} from '@ionic/react';
+import { useState, useEffect } from 'react';
+import TaskForm from '../components/TaskForm';
+import TaskList from '../components/TaskList';
 
-import { useState, useEffect } from "react";
-import AddContact from "../components/AddContact";
-import ContactList from "../components/ContactList";
-
-export interface Contact {
+export interface Task {
   id: number;
-  name: string;
-  phone: string;
+  title: string;
+  completed: boolean;
 }
 
-const Home: React.FC = () => {
+const App: React.FC = () => {
 
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
-    setTimeout(() => {
-      setContacts([
-        { id: 1, name: "Juan", phone: "123456" },
-        { id: 2, name: "Ana", phone: "987654" }
-      ]);
-      setLoading(false);
-    }, 1000);
-  }, []);
 
-  const addContact = (name: string, phone: string) => {
-    const newContact: Contact = {
+    if (tasks.length === 0) return;
+
+    setLoading(true);
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000); 
+
+    return () => clearTimeout(timer);
+
+  }, [tasks]);
+
+  const addTask = (title: string) => {
+    const newTask: Task = {
       id: Date.now(),
-      name,
-      phone
+      title,
+      completed: false
     };
 
-    setContacts(prev => [...prev, newContact]);
+    setTasks([...tasks, newTask]);
   };
 
-  const deleteContact = (id: number) => {
-    setContacts(prev => prev.filter(c => c.id !== id));
+  const toggleTask = (id: number) => {
+    setTasks(
+      tasks.map(task =>
+        task.id === id
+          ? { ...task, completed: !task.completed }
+          : task
+      )
+    );
+  };
+
+  const deleteTask = (id: number) => {
+    setTasks(tasks.filter(task => task.id !== id));
   };
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Lista de contactos</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+    <IonApp>
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Task Manager</IonTitle>
+          </IonToolbar>
+        </IonHeader>
 
-      <IonContent className="ion-padding">
+        <IonContent className="ion-padding">
 
-        <AddContact onAdd={addContact} />
+          {/* Mensaje de actualización */}
+          {loading && (
+            <div style={{ textAlign: "center", marginBottom: "15px" }}>
+              <IonSpinner name="crescent" />
+              <p>Actualizando tareas...</p>
+            </div>
+          )}
 
-        {loading && <p>Cargando contactos...</p>}
+          <TaskForm addTask={addTask} />
 
-        <ContactList
-          contacts={contacts}
-          onDelete={deleteContact}
-        />
+          <TaskList
+            tasks={tasks}
+            toggleTask={toggleTask}
+            deleteTask={deleteTask}
+          />
 
-      </IonContent>
-    </IonPage>
+        </IonContent>
+      </IonPage>
+    </IonApp>
   );
 };
 
-export default Home;
+export default App;
