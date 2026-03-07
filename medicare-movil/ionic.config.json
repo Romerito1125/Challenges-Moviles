@@ -1,0 +1,7 @@
+{
+  "name": "medicare-movil",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
