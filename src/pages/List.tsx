@@ -1,47 +1,48 @@
 import {
-  IonPage,
   IonContent,
-  IonButton
-} from "@ionic/react";
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  IonSpinner
+} from '@ionic/react';
 
-import { useEffect } from "react";
-import { useHistory } from "react-router";
+import { useContext } from 'react';
+import { TasksContext } from '../context/TareasContext';
+
+import TaskForm from '../components/TaskForm';
+import TaskList from '../components/TaskList';
 
 const List: React.FC = () => {
 
-  const history = useHistory();
-
-  useEffect(() => {
-
-    const logged = localStorage.getItem("logged");
-
-    if (logged !== "true") {
-      history.push("/login");
-    }
-
-  }, []);
-
-  const logout = () => {
-
-    localStorage.removeItem("logged");
-
-    history.push("/login");
-
-  };
+  const { tasks, loading, addTask, toggleTask, deleteTask } = useContext(TasksContext);
 
   return (
     <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>Task Manager</IonTitle>
+        </IonToolbar>
+      </IonHeader>
 
       <IonContent className="ion-padding">
 
-        <h2>Estás logueado</h2>
+        {loading && (
+          <div style={{ textAlign: "center", marginBottom: "15px" }}>
+            <IonSpinner name="crescent" />
+            <p>Actualizando tareas...</p>
+          </div>
+        )}
 
-        <IonButton color="danger" onClick={logout}>
-          Logout
-        </IonButton>
+        <TaskForm addTask={addTask} />
+
+        <TaskList
+          tasks={tasks}
+          toggleTask={toggleTask}
+          deleteTask={deleteTask}
+        />
 
       </IonContent>
-
     </IonPage>
   );
 };
