@@ -1,5 +1,5 @@
 import useCollection from "./useCollection";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 export const useContacts = () => {
@@ -11,14 +11,15 @@ export const useContacts = () => {
     isPending,
     error,
     add,
-    remove
+    remove,
+    getAll
   } = useCollection("contacts");
 
-  const getContacts = async () => {
-    if (!user) return;
-
-    return await results;
-  };
+  useEffect(() => {
+    if (user) {
+      getAll([["userId", "==", user.uid]]);
+    }
+  }, [user]);
 
   const addContact = async (contact: { name: string; phone: string }) => {
     if (!user) return;
@@ -27,17 +28,22 @@ export const useContacts = () => {
       ...contact,
       userId: user.uid
     });
+
+    await getAll([["userId", "==", user.uid]]); // Traigo el contacto para mostrarlo cuando lo cree
   };
 
   const deleteContact = async (id: string) => {
     await remove(id);
+
+    if (user) {
+      await getAll([["userId", "==", user.uid]]); // Refresco para que cuando lo elimine esté todo "sincronizado"
+    }
   };
 
   return {
     contacts: results,
     loading: isPending,
     error,
-    getContacts,
     addContact,
     deleteContact
   };

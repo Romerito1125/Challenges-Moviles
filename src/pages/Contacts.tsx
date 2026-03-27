@@ -10,7 +10,7 @@ import { useContext } from "react";
 import { ContactsContext } from "../context/ContactContext";
 import useNetwork from "../hooks/useNetwork";
 
-import AddContact from "../components/addContact";
+import AddContact from "../components/AddContact";
 import ContactList from "../components/ContactList";
 
 const Contact: React.FC = () => {
