@@ -1,13 +1,15 @@
-import { Task } from '../pages/Home';
+import { Task } from '../pages/List';
 import TaskItem from './TaskItem';
 
 interface Props {
   tasks: Task[];
-  toggleTask: (id: number) => void;
-  deleteTask: (id: number) => void;
+  toggleTask: (id: string) => void;
+  deleteTask: (id: string) => void;
+  disabled?: boolean;
 }
 
-const TaskList: React.FC<Props> = ({ tasks, toggleTask, deleteTask }) => {
+
+const TaskList: React.FC<Props> = ({ tasks, toggleTask, deleteTask, disabled }) => {
   return (
     <>
       {tasks.map(task => (
@@ -16,7 +18,9 @@ const TaskList: React.FC<Props> = ({ tasks, toggleTask, deleteTask }) => {
           task={task}
           toggleTask={toggleTask}
           deleteTask={deleteTask}
+          disabled={disabled}
         />
+
       ))}
     </>
   );

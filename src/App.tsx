@@ -1,9 +1,19 @@
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
+
+import { AuthProvider } from './context/AuthContext';
+import { TasksProvider } from './context/TareasContext';
+import { ContactsProvider } from './context/ContactContext';
+
+
 import Login from './pages/Login';
-import List from './pages/List';
 import Registro from './pages/Registro';
+import Home from './pages/Home';
+import Contacts from './pages/Contacts';
+import Fruits from './pages/Fruits';
+
+
 
 
 /* Core CSS required for Ionic components to work properly */
@@ -40,18 +50,28 @@ setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
+      <IonReactRouter>
 
-        <Route exact path="/login" component={Login} />
-        <Route exact path="/list" component={List} />
-        <Route exact path="/register" component={Registro} />
-        <Redirect exact from="/" to="/login" />
+        <AuthProvider>
+          <TasksProvider>
+            <ContactsProvider>
 
-      </IonRouterOutlet>
-    </IonReactRouter>
+              <Route path="/login" component={Login} exact />
+              <Route path="/register" component={Registro} exact />
 
-  </IonApp>
+              <Route path="/home" component={Home} exact />
+              <Route path="/contacts" component={Contacts} exact />
+              <Route path="/fruits" component={Fruits} exact />
+
+              <Redirect exact from="/" to="/login" />
+
+            </ContactsProvider>
+          </TasksProvider>
+        </AuthProvider>
+
+      </IonReactRouter>
+    </IonApp>
+
 );
 
 export default App;

@@ -2,17 +2,22 @@ import { IonItem, IonInput, IonButton } from '@ionic/react';
 import { useState } from 'react';
 
 interface Props {
-  addTask: (title: string) => void;
+  addTask: (task: { title: string; completed: boolean }) => void;
+  disabled?: boolean;
 }
 
-const TaskForm: React.FC<Props> = ({ addTask }) => {
+const TaskForm: React.FC<Props> = ({ addTask, disabled }) => {
 
   const [title, setTitle] = useState("");
 
   const handleSubmit = () => {
     if (title.trim() === "") return;
 
-    addTask(title);
+    addTask({
+      title,
+      completed: false
+    });
+
     setTitle("");
   };
 
@@ -26,7 +31,7 @@ const TaskForm: React.FC<Props> = ({ addTask }) => {
         />
       </IonItem>
 
-      <IonButton expand="block" onClick={handleSubmit}>
+      <IonButton expand="block" onClick={handleSubmit} disabled={disabled}>
         Agregar
       </IonButton>
     </>

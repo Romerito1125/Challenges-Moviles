@@ -1,64 +1,53 @@
-import { createContext, useState, useEffect } from "react";
-
-export interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+import { createContext, useContext } from "react";
+import useRealtimeCollection from "../hooks/useRealTime";
+import { AuthContext } from "./AuthContext";
 
 export const TasksContext = createContext<any>(null);
 
 export function TasksProvider({ children }: { children: React.ReactNode }) {
 
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { user } = useContext(AuthContext);
 
-  useEffect(() => {
+  const table = user ? `tasks/${user.uid}` : "tasks";
 
-    if (tasks.length === 0) return;
+  const {
+    results,
+    isPending,
+    error,
+    add,
+    update,
+    deleteDoc
+  } = useRealtimeCollection(table);
 
-    setLoading(true);
 
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
 
-    return () => clearTimeout(timer);
-
-  }, [tasks]);
-
-  const addTask = (title: string) => {
-    const newTask: Task = {
-      id: Date.now(),
-      title,
-      completed: false
-    };
-
-    setTasks([...tasks, newTask]);
+  const addTask = async (task: { title: string; completed: boolean }) => {
+    await add(task);
   };
 
-  const toggleTask = (id: number) => {
-    setTasks(
-      tasks.map(task =>
-        task.id === id
-          ? { ...task, completed: !task.completed }
-          : task
-      )
-    );
+
+  const toggleTask = async (task: any) => {
+    await update(task.id, {
+      ...task,
+      completed: !task.completed
+    });
   };
 
-  const deleteTask = (id: number) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const removeTask = async (id: string) => {
+    await deleteDoc(id);
   };
 
   return (
-    <TasksContext.Provider value={{
-      tasks,
-      loading,
-      addTask,
-      toggleTask,
-      deleteTask
-    }}>
+    <TasksContext.Provider
+      value={{
+        tasks: results,
+        loading: isPending,
+        error,
+        addTask,
+        toggleTask,
+        deleteTask: removeTask
+      }}
+    >
       {children}
     </TasksContext.Provider>
   );

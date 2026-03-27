@@ -33,7 +33,7 @@ const Registro: React.FC = () => {
       /* Inicia sesión de una vez y va al List */
       login(user);
 
-      history.push("/list");
+      history.push("/home");
 
     } catch (error) {
 

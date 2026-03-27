@@ -1,97 +1,88 @@
 import {
-  IonApp,
+  IonPage,
   IonContent,
   IonHeader,
-  IonPage,
-  IonTitle,
   IonToolbar,
-  IonSpinner
+  IonTitle,
+  IonButton,
+  IonIcon
 } from '@ionic/react';
-import { useState, useEffect } from 'react';
+
+import { list, people, nutrition, logOut, wifi, cloudOffline } from 'ionicons/icons';
+
+import { useContext } from 'react';
+import { useHistory } from 'react-router';
+
+import { TasksContext } from '../context/TareasContext';
+import { AuthContext } from '../context/AuthContext';
+import useNetwork from '../hooks/useNetwork';
+
 import TaskForm from '../components/TaskForm';
 import TaskList from '../components/TaskList';
 
-export interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+const Home: React.FC = () => {
 
-const App: React.FC = () => {
+  const history = useHistory();
 
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { tasks, loading, addTask, toggleTask, deleteTask } = useContext(TasksContext);
+  const { logout } = useContext(AuthContext);
+  const { isOnline, connectionType } = useNetwork();
 
-
-  useEffect(() => {
-
-    if (tasks.length === 0) return;
-
-    setLoading(true);
-
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000); 
-
-    return () => clearTimeout(timer);
-
-  }, [tasks]);
-
-  const addTask = (title: string) => {
-    const newTask: Task = {
-      id: Date.now(),
-      title,
-      completed: false
-    };
-
-    setTasks([...tasks, newTask]);
-  };
-
-  const toggleTask = (id: number) => {
-    setTasks(
-      tasks.map(task =>
-        task.id === id
-          ? { ...task, completed: !task.completed }
-          : task
-      )
-    );
-  };
-
-  const deleteTask = (id: number) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const handleLogout = () => {
+    logout();
+    history.push("/login");
   };
 
   return (
-    <IonApp>
-      <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>Task Manager</IonTitle>
-          </IonToolbar>
-        </IonHeader>
+    <IonPage>
 
-        <IonContent className="ion-padding">
+      <IonHeader>
+        <IonToolbar>
 
-          {/* Mensaje de actualización */}
-          {loading && (
-            <div style={{ textAlign: "center", marginBottom: "15px" }}>
-              <IonSpinner name="crescent" />
-              <p>Actualizando tareas...</p>
-            </div>
-          )}
+          <IonTitle>
+            <IonIcon icon={list} /> Tasks
+          </IonTitle>
 
-          <TaskForm addTask={addTask} />
+        </IonToolbar>
+      </IonHeader>
 
-          <TaskList
-            tasks={tasks}
-            toggleTask={toggleTask}
-            deleteTask={deleteTask}
-          />
+      <IonContent className="ion-padding">
 
-        </IonContent>
-      </IonPage>
-    </IonApp>
+        {/* 🌐 Estado de red */}
+        <p style={{ textAlign: "center" }}>
+          <IonIcon icon={isOnline ? wifi : cloudOffline} />{" "}
+          {isOnline ? `Online (${connectionType})` : "Offline"}
+        </p>
+
+        {/* 🔘 Navegación */}
+        <IonButton expand="block" onClick={() => history.push("/contacts")} disabled={!isOnline}>
+          <IonIcon icon={people} slot="start" />
+          Contacts
+        </IonButton>
+
+        <IonButton expand="block" onClick={() => history.push("/fruits")}>
+          <IonIcon icon={nutrition} slot="start" />
+          Fruits (Offline)
+        </IonButton>
+
+        <IonButton expand="block" color="danger" onClick={handleLogout}>
+          <IonIcon icon={logOut} slot="start" />
+          Logout
+        </IonButton>
+
+        {/* 🧠 Tasks */}
+        <TaskForm addTask={addTask} disabled={!isOnline} />
+
+        <TaskList
+          tasks={tasks}
+          toggleTask={toggleTask}
+          deleteTask={deleteTask}
+          disabled={!isOnline}
+        />
+
+      </IonContent>
+    </IonPage>
   );
 };
 
-export default App;
+export default Home;

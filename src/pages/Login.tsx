@@ -33,7 +33,7 @@ const Login: React.FC = () => {
       /* Inicia sesión y va al List, con el customhook */
       login(user);
 
-      history.push("/list");
+      history.push("/home");
 
     } catch (error) {
 
