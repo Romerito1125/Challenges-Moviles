@@ -8,14 +8,27 @@ import {
   IonIcon
 } from '@ionic/react';
 
-import { list, people, nutrition, logOut, wifi, cloudOffline } from 'ionicons/icons';
+import {
+  list,
+  people,
+  nutrition,
+  logOut,
+  wifi,
+  cloudOffline,
+  phonePortrait,
+  camera,
+  phoneLandscape,
+  folder,
+  pulse,
+  notifications,
+  send
+} from 'ionicons/icons';
 
 import { useContext } from 'react';
 import { useHistory } from 'react-router';
 
 import { TasksContext } from '../context/TareasContext';
 import { AuthContext } from '../context/AuthContext';
-import useNetwork from '../hooks/useNetwork';
 
 import TaskForm from '../components/TaskForm';
 import TaskList from '../components/TaskList';
@@ -24,63 +37,46 @@ const Home: React.FC = () => {
 
   const history = useHistory();
 
-  const { tasks, loading, addTask, toggleTask, deleteTask } = useContext(TasksContext);
-  const { logout } = useContext(AuthContext);
-  const { isOnline, connectionType } = useNetwork();
-
-  const handleLogout = () => {
-    logout();
-    history.push("/login");
-  };
 
   return (
     <IonPage>
 
-      <IonHeader>
-        <IonToolbar>
-
-          <IonTitle>
-            <IonIcon icon={list} /> Tasks
-          </IonTitle>
-
-        </IonToolbar>
-      </IonHeader>
-
-      <IonContent className="ion-padding">
-
-        {/* 🌐 Estado de red */}
-        <p style={{ textAlign: "center" }}>
-          <IonIcon icon={isOnline ? wifi : cloudOffline} />{" "}
-          {isOnline ? `Online (${connectionType})` : "Offline"}
-        </p>
-
-        {/* 🔘 Navegación */}
-        <IonButton expand="block" onClick={() => history.push("/contacts")} disabled={!isOnline}>
-          <IonIcon icon={people} slot="start" />
-          Contacts
+        <IonButton expand="block" onClick={() => history.push("/accelerometer")}>
+          <IonIcon icon={phonePortrait} slot="start" />
+          Accelerometer
         </IonButton>
 
-        <IonButton expand="block" onClick={() => history.push("/fruits")}>
-          <IonIcon icon={nutrition} slot="start" />
-          Fruits (Offline)
+        <IonButton expand="block" onClick={() => history.push("/camera")}>
+          <IonIcon icon={camera} slot="start" />
+          Cámara
         </IonButton>
 
-        <IonButton expand="block" color="danger" onClick={handleLogout}>
-          <IonIcon icon={logOut} slot="start" />
-          Logout
+        <IonButton expand="block" onClick={() => history.push("/device")}>
+          <IonIcon icon={phoneLandscape} slot="start" />
+          Device
         </IonButton>
 
-        {/* 🧠 Tasks */}
-        <TaskForm addTask={addTask} disabled={!isOnline} />
+        <IonButton expand="block" onClick={() => history.push("/filesystem")}>
+          <IonIcon icon={folder} slot="start" />
+          FileSystem
+        </IonButton>
 
-        <TaskList
-          tasks={tasks}
-          toggleTask={toggleTask}
-          deleteTask={deleteTask}
-          disabled={!isOnline}
-        />
+        <IonButton expand="block" onClick={() => history.push("/haptic")}>
+          <IonIcon icon={pulse} slot="start" />
+          Haptics
+        </IonButton>
 
-      </IonContent>
+        <IonButton expand="block" onClick={() => history.push("/local-notification")}>
+          <IonIcon icon={notifications} slot="start" />
+          Local Notifications
+        </IonButton>
+
+        <IonButton expand="block" onClick={() => history.push("/push-notification")}>
+          <IonIcon icon={send} slot="start" />
+          Push Notifications
+        </IonButton>
+
+
     </IonPage>
   );
 };

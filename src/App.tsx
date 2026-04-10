@@ -7,12 +7,16 @@ import { TasksProvider } from './context/TareasContext';
 import { ContactsProvider } from './context/ContactContext';
 
 
-import Login from './pages/Login';
-import Registro from './pages/Registro';
 import Home from './pages/Home';
-import Contacts from './pages/Contacts';
-import Fruits from './pages/Fruits';
 
+
+import Accelerometer from './pages/Device';
+import Camara from './pages/Camara';
+import Device from './pages/Accelerometer';
+import FileSystem from './pages/FileSystem';
+import Haptic from './pages/Haptic';
+import LocalNotification from './pages/LocalNotification';
+import PushNotification from './pages/PushNotification';
 
 
 
@@ -50,27 +54,19 @@ setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
-      <IonReactRouter>
+    <IonReactRouter>
+      <Route path="/home" component={Home} exact />
+      <Route path="/accelerometer" component={Accelerometer} exact />
+      <Route path="/camera" component={Camara} exact />
+      <Route path="/device" component={Device} exact />
+      <Route path="/filesystem" component={FileSystem} exact />
+      <Route path="/haptic" component={Haptic} exact />
+      <Route path="/local-notification" component={LocalNotification} exact />
+      <Route path="/push-notification" component={PushNotification} exact />
+      <Redirect exact from="/" to="/home" />
 
-        <AuthProvider>
-          <TasksProvider>
-            <ContactsProvider>
-
-              <Route path="/login" component={Login} exact />
-              <Route path="/register" component={Registro} exact />
-
-              <Route path="/home" component={Home} exact />
-              <Route path="/contacts" component={Contacts} exact />
-              <Route path="/fruits" component={Fruits} exact />
-
-              <Redirect exact from="/" to="/login" />
-
-            </ContactsProvider>
-          </TasksProvider>
-        </AuthProvider>
-
-      </IonReactRouter>
-    </IonApp>
+    </IonReactRouter>
+  </IonApp>
 
 );
 
