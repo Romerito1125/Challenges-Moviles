@@ -34,7 +34,7 @@ const Haptic: React.FC = () => {
             </IonButton>
 
             <IonButton onClick={() => vibrate(200)}>
-                Vibrar
+                Vibrar.q
             </IonButton>
         </>
     )
