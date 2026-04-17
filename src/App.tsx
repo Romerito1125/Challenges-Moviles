@@ -17,6 +17,7 @@ import FileSystem from './pages/FileSystem';
 import Haptic from './pages/Haptic';
 import LocalNotification from './pages/LocalNotification';
 import PushNotification from './pages/PushNotification';
+import TrackingPage from './pages/Tracking';
 
 
 
@@ -63,6 +64,8 @@ const App: React.FC = () => (
       <Route path="/haptic" component={Haptic} exact />
       <Route path="/local-notification" component={LocalNotification} exact />
       <Route path="/push-notification" component={PushNotification} exact />
+      <Route path="/tracking" component={TrackingPage} exact />
+
       <Redirect exact from="/" to="/home" />
 
     </IonReactRouter>
