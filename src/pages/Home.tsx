@@ -1,84 +1,124 @@
 import {
-  IonPage,
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButton,
-  IonIcon
-} from '@ionic/react';
+  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton
+} from "@ionic/react";
+import { getDistance } from "../utils/calcularDistancia";
+import { useEffect, useRef } from "react";
+import { useMissions } from "../context/MisionesContext";
+import MissionList from "../components/MisionList";
+import ProgressBar from "../components/Progreso";
+import { useCamera } from "../hooks/useCamera";
+import { useGeolocation } from "../hooks/useGeolocation";
+import { useAccelerometer } from "../hooks/useAccelerometer";
+import { useHaptics } from "../hooks/useHaptics";
+import { useLocalNotifications } from "../hooks/useLocalNotification";
+import Ranking from "../components/Raking";
 
-import { list, people, nutrition, logOut, wifi, cloudOffline } from 'ionicons/icons';
+const Home = () => {
 
-import { useContext } from 'react';
-import { useHistory } from 'react-router';
+  const { misiones, puntos, completarMision } = useMissions();
 
-import { TasksContext } from '../context/TareasContext';
-import { AuthContext } from '../context/AuthContext';
-import useNetwork from '../hooks/useNetwork';
+  const { photo, takePhoto } = useCamera();
+  const { position, startTracking } = useGeolocation();
+  const { isMoving } = useAccelerometer();
+  const { vibrate } = useHaptics();
+  const { sendNotification, requestPermission } = useLocalNotifications();
+  const startPos = useRef<any>(null);
+  const timerRef = useRef<any>(null);
 
-import TaskForm from '../components/TaskForm';
-import TaskList from '../components/TaskList';
+  useEffect(() => {
+    requestPermission();
+  }, []);
 
-const Home: React.FC = () => {
+  useEffect(() => {
+    console.log("FOTO:", photo);
 
-  const history = useHistory();
+    if (photo) {
+      console.log("COMPLETANDO MISIÓN 1");
+      completarMision(1);
 
-  const { tasks, loading, addTask, toggleTask, deleteTask } = useContext(TasksContext);
-  const { logout } = useContext(AuthContext);
-  const { isOnline, connectionType } = useNetwork();
+      sendNotification({
+        title: "Misión completada",
+        body: "Foto tomada"
+      });
+    }
+  }, [photo]);
 
-  const handleLogout = () => {
-    logout();
-    history.push("/login");
-  };
+  useEffect(() => {
+    if (!position) return;
+
+    if (!startPos.current) {
+      startPos.current = position;
+      return;
+    }
+
+    const dist = getDistance(
+      startPos.current.latitude,
+      startPos.current.longitude,
+      position.latitude,
+      position.longitude
+    );
+
+    if (dist > 30) {
+      completarMision(2);
+      sendNotification({ title: "Misión completada", body: "Te moviste" });
+    }
+  }, [position]);
+
+  useEffect(() => {
+    if (!misiones[1]?.completado) return;
+
+    if (!isMoving) {
+      if (!timerRef.current) {
+        timerRef.current = setTimeout(() => {
+          vibrate();
+          completarMision(3);
+        }, 10000);
+      }
+    } else {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [isMoving, misiones]);
 
   return (
     <IonPage>
-
       <IonHeader>
         <IonToolbar>
-
-          <IonTitle>
-            <IonIcon icon={list} /> Tasks
-          </IonTitle>
-
+          <IonTitle>Misiones</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent className="ion-padding">
 
-        {/* 🌐 Estado de red */}
-        <p style={{ textAlign: "center" }}>
-          <IonIcon icon={isOnline ? wifi : cloudOffline} />{" "}
-          {isOnline ? `Online (${connectionType})` : "Offline"}
-        </p>
+        <h2>Puntos: {puntos}</h2>
 
-        {/* 🔘 Navegación */}
-        <IonButton expand="block" onClick={() => history.push("/contacts")} disabled={!isOnline}>
-          <IonIcon icon={people} slot="start" />
-          Contacts
+        <ProgressBar misiones={misiones} />
+
+        <MissionList misiones={misiones} />
+
+        <IonButton expand="block" onClick={takePhoto}>
+          Tomar Foto
         </IonButton>
 
-        <IonButton expand="block" onClick={() => history.push("/fruits")}>
-          <IonIcon icon={nutrition} slot="start" />
-          Fruits (Offline)
+        <IonButton expand="block" onClick={startTracking}>
+          Iniciar GPS
         </IonButton>
+        {/* DEBUG GEO */}
+        <div style={{ marginTop: 20 }}>
+          <h3>Ubicación actual:</h3>
 
-        <IonButton expand="block" color="danger" onClick={handleLogout}>
-          <IonIcon icon={logOut} slot="start" />
-          Logout
-        </IonButton>
+          {!position && <p>⏳ Esperando ubicación...</p>}
 
-        {/* 🧠 Tasks */}
-        <TaskForm addTask={addTask} disabled={!isOnline} />
+          {position && (
+            <>
+              <p>Lat: {position.latitude}</p>
+              <p>Lng: {position.longitude}</p>
+              <p>Precisión: {position.accuracy}</p>
+            </>
+          )}
+        </div>
 
-        <TaskList
-          tasks={tasks}
-          toggleTask={toggleTask}
-          deleteTask={deleteTask}
-          disabled={!isOnline}
-        />
+        <Ranking />
 
       </IonContent>
     </IonPage>
@@ -86,3 +126,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+

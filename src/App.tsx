@@ -45,33 +45,34 @@ import '@ionic/react/css/palettes/dark.system.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { MissionsProvider } from './context/MisionesContext';
 
 setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
-      <IonReactRouter>
+    <IonReactRouter>
 
-        <AuthProvider>
-          <TasksProvider>
-            <ContactsProvider>
+      <AuthProvider>
+        <TasksProvider>
+            <MissionsProvider>
 
-              <Route path="/login" component={Login} exact />
-              <Route path="/register" component={Registro} exact />
+            <Route path="/login" component={Login} exact />
+            <Route path="/register" component={Registro} exact />
 
-              <Route path="/home" component={Home} exact />
-              <Route path="/contacts" component={Contacts} exact />
-              <Route path="/fruits" component={Fruits} exact />
+            <Route path="/home" component={Home} exact />
+            <Route path="/contacts" component={Contacts} exact />
+            <Route path="/fruits" component={Fruits} exact />
 
-              <Redirect exact from="/" to="/login" />
+            <Redirect exact from="/" to="/login" />
 
-            </ContactsProvider>
-          </TasksProvider>
-        </AuthProvider>
+            </ MissionsProvider>          
+            </TasksProvider>
+          </AuthProvider>
 
-      </IonReactRouter>
-    </IonApp>
+        </IonReactRouter>
+      </IonApp>
 
-);
+      );
 
-export default App;
+      export default App;
