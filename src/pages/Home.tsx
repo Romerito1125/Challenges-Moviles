@@ -47,14 +47,10 @@ const Home: React.FC = () => {
       </IonHeader>
 
       <IonContent className="ion-padding">
-
-        {/* 🌐 Estado de red */}
         <p style={{ textAlign: "center" }}>
           <IonIcon icon={isOnline ? wifi : cloudOffline} />{" "}
           {isOnline ? `Online (${connectionType})` : "Offline"}
         </p>
-
-        {/* 🔘 Navegación */}
         <IonButton expand="block" onClick={() => history.push("/contacts")} disabled={!isOnline}>
           <IonIcon icon={people} slot="start" />
           Contacts
@@ -65,13 +61,20 @@ const Home: React.FC = () => {
           Fruits (Offline)
         </IonButton>
 
-        <IonButton expand="block" color="danger" onClick={handleLogout}>
+        {/* <IonButton expand="block" color="danger" onClick={handleLogout}>
           <IonIcon icon={logOut} slot="start" />
           Logout
-        </IonButton>
+        </IonButton> */}
+        <button className='bg-blue-600 w-full h-10'> 
 
-        {/* 🧠 Tasks */}
+          <IonIcon icon={logOut} slot="start" />
+          Cerrar sesión
+
+        </button>
+        {/* Tasks */}
         <TaskForm addTask={addTask} disabled={!isOnline} />
+
+
 
         <TaskList
           tasks={tasks}
@@ -79,6 +82,9 @@ const Home: React.FC = () => {
           deleteTask={deleteTask}
           disabled={!isOnline}
         />
+
+        <h1 className="text-3xl font-bold text-white mb-4">Welcome to Ionic</h1>
+        <p className="text-white mb-6">This is a Tailwind CSS styled Ionic app.</p>
 
       </IonContent>
     </IonPage>
