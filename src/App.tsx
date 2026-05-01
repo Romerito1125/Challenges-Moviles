@@ -11,9 +11,11 @@ import Login from './pages/Login';
 import Registro from './pages/Registro';
 import Home from './pages/Home';
 import Contacts from './pages/Contacts';
-import Fruits from './pages/Fruits';
-
-
+import WorkLocation from './pages/WorkLocation';
+import EmployeeHistory from './pages/WorkHistory';
+import AdminDashboard from './pages/AdminDashboard';
+import EmployeesAdmin from './pages/EmployeesManagement';
+import EmployeeProfile from './pages/Profile';
 
 
 /* Core CSS required for Ionic components to work properly */
@@ -61,8 +63,11 @@ const App: React.FC = () => (
 
               <Route path="/home" component={Home} exact />
               <Route path="/contacts" component={Contacts} exact />
-              <Route path="/fruits" component={Fruits} exact />
-
+              <Route path="/work-location" component={WorkLocation} exact />
+              <Route path="/employee-history" component={EmployeeHistory} exact />
+              <Route path="/admin-dashboard" component={AdminDashboard} exact />
+              <Route path="/employees" component={EmployeesAdmin} exact />
+              <Route path="/profile" component={EmployeeProfile} exact />
               <Redirect exact from="/" to="/login" />
 
             </ContactsProvider>
