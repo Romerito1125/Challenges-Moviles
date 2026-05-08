@@ -11,7 +11,6 @@ import { Employee } from '../api/employeeService';
 type EmployeeFormData = Omit<Employee, 'id' | 'created_at' | 'updated_at'>;
 
 interface Props {
-  /** Pass an employee to pre-fill the form for editing; omit for creation */
   initial?: EmployeeFormData;
   isPending?: boolean;
   error?: string | null;
@@ -30,7 +29,6 @@ const EmployeeForm: React.FC<Props> = ({
 }) => {
   const [form, setForm] = useState<EmployeeFormData>(initial ?? emptyForm);
 
-  // Sync when the parent swaps between create / edit
   useEffect(() => {
     setForm(initial ?? emptyForm);
   }, [initial]);

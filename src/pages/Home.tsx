@@ -49,7 +49,6 @@ export default function EmployeeHome() {
     <IonPage>
       <IonContent>
         <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black text-white p-6 flex flex-col gap-6">
-          {/* HEADER */}
           <div>
             <h1 className="text-3xl font-bold">Registro de Jornada</h1>
             <p className="text-gray-400 text-sm mt-1">
@@ -57,7 +56,6 @@ export default function EmployeeHome() {
             </p>
           </div>
 
-          {/* CARD PRINCIPAL */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-lg">
             <div className="flex justify-between items-center">
               <div>
