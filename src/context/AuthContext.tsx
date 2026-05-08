@@ -1,20 +1,21 @@
-import { createContext, useEffect, useState  } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { createContext, useContext } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
-
-export const AuthContext = createContext<any>(null);
-
+export const AuthContext = createContext<ReturnType<typeof useAuth> | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const auth = useAuth();
 
+  return (
+    <AuthContext.Provider value={auth}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
-    const { user, login, logout } = useAuth();
-
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-
-
+/** Convenience hook — throws if used outside <AuthProvider> */
+export function useAuthContext() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuthContext must be used inside <AuthProvider>');
+  return ctx;
 }

@@ -3,13 +3,12 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 
 import { AuthProvider } from "./context/AuthContext";
-import { TasksProvider } from "./context/TareasContext";
-import { ContactsProvider } from "./context/ContactContext";
+
 
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import Home from "./pages/Home";
- import WorkLocation from "./pages/WorkLocation";
+import WorkLocation from "./pages/WorkLocation";
 import EmployeeHistory from "./pages/WorkHistory";
 import AdminDashboard from "./pages/AdminDashboard";
 import EmployeesAdmin from "./pages/EmployeesManagement";
@@ -51,26 +50,24 @@ const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <AuthProvider>
-        <TasksProvider>
-          <ContactsProvider>
-            <IonRouterOutlet>
-              <Route path="/login" component={Login} exact />
-              <Route path="/register" component={Registro} exact />
 
-              <Route path="/home" component={Home} exact />
-              <Route path="/work-location" component={WorkLocation} exact />
-              <Route
-                path="/employee-history"
-                component={EmployeeHistory}
-                exact
-              />
-              <Route path="/admin-dashboard" component={AdminDashboard} exact />
-              <Route path="/employees" component={EmployeesAdmin} exact />
-              <Route path="/profile" component={EmployeeProfile} exact />
-              <Redirect exact from="/" to="/login" />
-            </IonRouterOutlet>
-          </ContactsProvider>
-        </TasksProvider>
+        <IonRouterOutlet>
+          <Route path="/login" component={Login} exact />
+          <Route path="/register" component={Registro} exact />
+
+          <Route path="/home" component={Home} exact />
+          <Route path="/work-location" component={WorkLocation} exact />
+          <Route
+            path="/employee-history"
+            component={EmployeeHistory}
+            exact
+          />
+          <Route path="/admin-dashboard" component={AdminDashboard} exact />
+          <Route path="/employees" component={EmployeesAdmin} exact />
+          <Route path="/profile" component={EmployeeProfile} exact />
+          <Redirect exact from="/" to="/login" />
+        </IonRouterOutlet>
+
       </AuthProvider>
     </IonReactRouter>
   </IonApp>

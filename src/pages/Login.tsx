@@ -4,54 +4,40 @@ import {
   IonInput,
   IonItem,
   IonButton,
-  IonAlert
-} from "@ionic/react";
-
-import { useState, useContext } from "react";
-import { useHistory } from "react-router";
-
-import { AuthContext } from "../context/AuthContext";
-import { useFirebaseAuth } from "../hooks/useFireBase";
+  IonAlert,
+  IonSpinner,
+} from '@ionic/react';
+import { useState } from 'react';
+import { useHistory } from 'react-router';
+import { useAuthContext } from '../context/AuthContext';
 
 const Login: React.FC = () => {
-
   const history = useHistory();
+  const { login, isPending } = useAuthContext();
 
-  const { login } = useContext(AuthContext);
-  const { loginUser } = useFirebaseAuth();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleLogin = async () => {
-
+    setErrorMsg(null);
     try {
-
-      const user = await loginUser(email, password);
-
-      /* Inicia sesión y va al List, con el customhook */
-      login(user);
-
-      history.push("/home");
-
-    } catch (error) {
-
-      setIsOpen(true);
-      console.log((error as Error).message);
-
+      await login(email, password);
+      history.push('/home');
+    } catch (err) {
+      setErrorMsg((err as Error).message ?? 'Credenciales incorrectas');
     }
-
   };
 
   return (
     <IonPage>
-
       <IonContent className="ion-padding">
 
         <IonItem>
           <IonInput
             placeholder="Email"
+            type="email"
+            value={email}
             onIonChange={(e) => setEmail(e.detail.value!)}
           />
         </IonItem>
@@ -59,29 +45,29 @@ const Login: React.FC = () => {
         <IonItem>
           <IonInput
             type="password"
-            placeholder="Password"
+            placeholder="Contraseña"
+            value={password}
             onIonChange={(e) => setPassword(e.detail.value!)}
           />
         </IonItem>
 
-        <IonButton expand="block" onClick={handleLogin}>
-          Login
+        <IonButton expand="block" onClick={handleLogin} disabled={isPending} className="mt-4">
+          {isPending ? <IonSpinner name="crescent" /> : 'Iniciar sesión'}
         </IonButton>
-        
-        <IonButton expand="block" fill="clear" onClick={() => history.push("/register")}>
+
+        <IonButton expand="block" fill="clear" onClick={() => history.push('/register')}>
           ¿No tienes cuenta? Regístrate
         </IonButton>
 
         <IonAlert
-          isOpen={isOpen}
+          isOpen={!!errorMsg}
           header="Error"
-          message="Credenciales incorrectas"
+          message={errorMsg ?? ''}
           buttons={['OK']}
-          onDidDismiss={() => setIsOpen(false)}
+          onDidDismiss={() => setErrorMsg(null)}
         />
 
       </IonContent>
-
     </IonPage>
   );
 };
