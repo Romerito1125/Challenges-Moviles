@@ -70,6 +70,8 @@ export function useAuth() {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    // Limpiar el id de empleado cacheado para que no persista entre sesiones
+    sessionStorage.removeItem('employee_id');
   };
 
   return { user, session, isPending, error, login, register, logout };

@@ -106,8 +106,8 @@ export default function SetPassword() {
   if (step === 'loading') {
     return (
       <IonPage>
-        <IonContent>
-          <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#020617] to-black flex flex-col items-center justify-center gap-4 text-white">
+        <IonContent style={{ '--background': '#020617' }}>
+          <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black flex flex-col items-center justify-center gap-4 text-white">
             <IonSpinner name="crescent" className="text-blue-400 w-10 h-10" />
             <p className="text-gray-400">Verificando invitación...</p>
           </div>
@@ -120,8 +120,8 @@ export default function SetPassword() {
   if (step === 'error') {
     return (
       <IonPage>
-        <IonContent>
-          <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#020617] to-black flex flex-col items-center justify-center gap-4 text-white px-8">
+        <IonContent style={{ '--background': '#020617' }}>
+          <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black flex flex-col items-center justify-center gap-4 text-white px-8">
             <div className="w-20 h-20 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center">
               <span className="text-4xl">⚠️</span>
             </div>
@@ -145,8 +145,8 @@ export default function SetPassword() {
   if (step === 'success') {
     return (
       <IonPage>
-        <IonContent>
-          <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#020617] to-black flex flex-col items-center justify-center gap-5 text-white px-8">
+        <IonContent style={{ '--background': '#020617' }}>
+          <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black flex flex-col items-center justify-center gap-5 text-white px-8">
             <div className="w-20 h-20 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center">
               <IonIcon icon={checkmarkCircleOutline} className="text-green-400 text-5xl" />
             </div>
@@ -156,7 +156,7 @@ export default function SetPassword() {
             </p>
             <button
               onClick={() => history.replace('/login')}
-              className="w-full max-w-xs px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl text-white font-bold text-lg shadow-lg shadow-blue-900/40 active:scale-95 transition-all"
+              className="w-full max-w-xs px-6 py-4 bg-linear-to-r from-blue-600 to-blue-500 rounded-2xl text-white font-bold text-lg shadow-lg shadow-blue-900/40 active:scale-95 transition-all"
             >
               Ir al login
             </button>
@@ -169,8 +169,8 @@ export default function SetPassword() {
   // ── Formulario ───────────────────────────────────────────────────────────
   return (
     <IonPage>
-      <IonContent>
-        <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#020617] to-black text-white flex flex-col px-6 py-12 gap-8">
+      <IonContent style={{ '--background': '#020617' }}>
+        <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black text-white flex flex-col px-6 py-12 gap-8">
 
           {/* Encabezado */}
           <div className="flex flex-col items-center gap-3 pt-6">
@@ -265,7 +265,7 @@ export default function SetPassword() {
             <button
               type="submit"
               disabled={isPending || password.length < 8}
-              className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl text-white font-bold text-lg shadow-lg shadow-blue-900/40 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+              className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-linear-to-r from-blue-600 to-blue-500 rounded-2xl text-white font-bold text-lg shadow-lg shadow-blue-900/40 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed mt-2"
             >
               {isPending ? (
                 <IonSpinner name="crescent" className="text-white" />

@@ -23,14 +23,15 @@ import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
 import { useGeolocation } from '../hooks/useGeolocation';
-import { useJornadaLocal } from '../hooks/useJornadaLocal';
+import { useJornada } from '../context/JornadaContext';
 import { useAuthContext } from '../context/AuthContext';
+import { getMyEmployeeId } from '../api/employeeService';
 
 export default function CameraCapture() {
   const history = useHistory();
   const { takePhoto, photo } = useCamera();
   const { position, error: geoError, getCurrentLocation } = useGeolocation();
-  const { iniciarJornada } = useJornadaLocal();
+  const { iniciarJornada } = useJornada();
   const { user } = useAuthContext();
 
   const [loadingGeo, setLoadingGeo] = useState(false);
@@ -70,10 +71,12 @@ export default function CameraCapture() {
       ? { lat: position.latitude, lng: position.longitude }
       : null;
 
-    // user?.id es el auth_user_id de Supabase.
-    // El backend relaciona ese UUID con el id numérico del empleado.
-    // Pasamos el auth_user_id; el backend lo resuelve internamente.
-    await iniciarJornada(photo, coords, user?.id ?? null);
+    // Resolver el id numérico del empleado desde el backend.
+    // user?.id es el UUID de Supabase Auth, pero el backend necesita
+    // el id numérico de la tabla employees (ej: 5).
+    const idEmpleado = await getMyEmployeeId();
+
+    await iniciarJornada(photo, coords, idEmpleado ? String(idEmpleado) : null);
 
     history.replace('/home');
   };
@@ -84,8 +87,8 @@ export default function CameraCapture() {
 
   return (
     <IonPage>
-      <IonContent>
-        <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#020617] to-black text-white flex flex-col">
+      <IonContent style={{ '--background': '#020617' }}>
+        <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black text-white flex flex-col">
 
           {/* Header */}
           <div className="flex items-center justify-between px-6 pt-10 pb-4">
@@ -182,7 +185,7 @@ export default function CameraCapture() {
             <button
               onClick={handleVerificar}
               disabled={!photo || iniciando}
-              className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-gradient-to-r from-green-600 to-emerald-500 rounded-2xl shadow-lg shadow-green-900/40 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-linear-to-r from-green-600 to-emerald-500 rounded-2xl shadow-lg shadow-green-900/40 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {iniciando ? (
                 <IonSpinner name="crescent" className="text-white" />

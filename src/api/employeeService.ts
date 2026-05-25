@@ -37,6 +37,35 @@ export const getEmployeeById = async (id: string | number): Promise<Employee> =>
 };
 
 /**
+ * GET /api/employees/me
+ * El backend identifica al empleado por el auth_user_id del token JWT.
+ * Devuelve el perfil del empleado logueado.
+ */
+export const getMyProfile = async (): Promise<Employee> => {
+  const { data } = await axiosClient.get<ApiResponse<Employee>>('/employees/me');
+  return data.data!;
+};
+
+/**
+ * Resuelve el id numérico del empleado logueado desde el backend.
+ * Cachea el resultado en sessionStorage para no repetir la llamada.
+ */
+export const getMyEmployeeId = async (): Promise<number | null> => {
+  const cached = sessionStorage.getItem('employee_id');
+  if (cached) return Number(cached);
+  try {
+    const emp = await getMyProfile();
+    if (emp.id) {
+      sessionStorage.setItem('employee_id', String(emp.id));
+      return Number(emp.id);
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+/**
  * POST /api/employees
  * Crea el empleado Y envía la invitación por email automáticamente.
  * El frontend NO llama a Supabase Auth directamente para esto.

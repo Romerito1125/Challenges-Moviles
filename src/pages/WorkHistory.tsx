@@ -18,7 +18,9 @@ import {
 } from "ionicons/icons";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { useJornadaLocal, JornadaRegistro } from "../hooks/useJornadaLocal";
+import { useJornada } from "../context/JornadaContext";
+import { JornadaRegistro } from "../hooks/useJornadaLocal";
+import MapaUbicacion from "../components/MapaUbicacion";
 
 function formatDuracion(minutos: number): string {
   const h = Math.floor(minutos / 60);
@@ -79,15 +81,19 @@ function JornadaCard({ jornada }: { jornada: JornadaRegistro }) {
           </div>
 
           {/* Ubicación entrada */}
-          <div className="flex items-center gap-3">
-            <IonIcon icon={locationOutline} className="text-teal-400 text-lg" />
-            <div>
+          <div className="flex items-start gap-3">
+            <IonIcon icon={locationOutline} className="text-teal-400 text-lg mt-1" />
+            <div style={{ flex: 1 }}>
               <p className="text-gray-400 text-xs">Ubicación de entrada</p>
               {jornada.coordenadasEntrada ? (
-                <p className="text-white text-sm font-medium">
-                  {jornada.coordenadasEntrada.lat.toFixed(5)},{" "}
-                  {jornada.coordenadasEntrada.lng.toFixed(5)}
-                </p>
+                <div style={{ marginTop: 8 }}>
+                  <MapaUbicacion
+                    lat={jornada.coordenadasEntrada.lat}
+                    lng={jornada.coordenadasEntrada.lng}
+                    label="Entrada"
+                    height={160}
+                  />
+                </div>
               ) : (
                 <p className="text-gray-500 text-sm">No disponible</p>
               )}
@@ -99,9 +105,9 @@ function JornadaCard({ jornada }: { jornada: JornadaRegistro }) {
             <IonIcon icon={cameraOutline} className="text-orange-400 text-lg mt-0.5" />
             <div>
               <p className="text-gray-400 text-xs">Foto de entrada</p>
-              {jornada.fotoEntrada ? (
+              {jornada.fotoDataUrl ? (
                 <img
-                  src={jornada.fotoEntrada}
+                  src={jornada.fotoDataUrl}
                   alt="Foto de entrada"
                   className="mt-2 w-20 h-20 rounded-xl object-cover border border-white/10"
                 />
@@ -134,7 +140,7 @@ function JornadaCard({ jornada }: { jornada: JornadaRegistro }) {
 
 export default function EmployeeHistory() {
   const history = useHistory();
-  const { historial } = useJornadaLocal();
+  const { historial } = useJornada();
 
   // Estadísticas rápidas
   const totalHoras = historial.reduce((acc, j) => acc + j.horasTrabajadas, 0);
@@ -143,8 +149,8 @@ export default function EmployeeHistory() {
 
   return (
     <IonPage>
-      <IonContent>
-        <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#020617] to-black text-white px-6 py-10 flex flex-col gap-6">
+      <IonContent style={{ '--background': '#020617' }}>
+        <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black text-white px-6 py-10 flex flex-col gap-6">
 
           {/* Header */}
           <div className="flex items-center gap-4">

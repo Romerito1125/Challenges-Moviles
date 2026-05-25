@@ -2,56 +2,50 @@
  * useJornadaLocal
  * ---------------
  * Maneja el ciclo completo de una jornada laboral.
- * Guarda en localStorage y sincroniza con el backend cuando hay conexión.
  *
- * Flujo con backend:
- *   1. iniciarJornada()  → POST /api/jornadas (marcar entrada)
- *      - Guarda localmente con sincronizado: false
- *      - Intenta llamar al backend; si responde, guarda idBackend y marca sincronizado: true
- *   2. finalizarJornada() → PATCH /api/jornadas/:idBackend/salida
- *      - Si hay idBackend: llama al backend directamente
- *      - Si no hay idBackend (offline): guarda localmente con sincronizado: false
- *   3. sincronizarPendientes() → sincroniza todos los registros offline
+ * Almacenamiento:
+ *   - localStorage  → datos ligeros (timestamps, coords, ids, flags)
+ *   - IndexedDB     → fotos en base64 (pueden pesar varios MB)
  *
- * Estructura en localStorage:
- *   - "jornada_activa"     → JornadaActiva | null
- *   - "jornadas_historial" → JornadaRegistro[]
+ * Las fotos se guardan en IndexedDB con un ID único.
+ * En localStorage y en los objetos de estado solo se guarda ese ID.
+ * Al leer, se resuelve el dataUrl desde IndexedDB bajo demanda.
  */
 
 import { useState, useEffect } from 'react';
+import db from '../dexie/config';
 import { marcarEntrada, marcarSalida, MarcarEntradaDto, MarcarSalidaDto } from '../api/jornadaService';
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
 
 export interface JornadaActiva {
-  /** ISO string del momento en que se marcó entrada */
   horaEntrada: string;
-  /** Foto tomada al iniciar (webPath de Capacitor Camera o URL de Storage) */
-  fotoEntrada: string | null;
-  /** Coordenadas al iniciar */
+  /** ID de la foto en IndexedDB (null si no hay foto) */
+  fotoId: string | null;
+  /** dataUrl resuelto en memoria — NO se persiste en localStorage */
+  fotoDataUrl?: string | null;
   coordenadasEntrada: { lat: number; lng: number } | null;
-  /** ID del empleado en la tabla employees */
   idEmpleado: string | null;
-  /** ID del registro en el backend (null si aún no se sincronizó la entrada) */
   idBackend: number | null;
 }
 
 export interface JornadaRegistro {
-  /** ID local (prefijo "local_") o ID del backend como string */
   id: string;
-  /** ID numérico del backend — null si nunca se sincronizó */
   idBackend: number | null;
   idEmpleado: string | null;
-  fecha: string;             // YYYY-MM-DD
-  horaEntrada: string;       // HH:MM:SS
-  horaSalida: string;        // HH:MM:SS
-  fotoEntrada: string | null;
+  fecha: string;
+  horaEntrada: string;
+  horaSalida: string;
+  /** ID de la foto en IndexedDB */
+  fotoId: string | null;
+  /** dataUrl resuelto en memoria — NO se persiste en localStorage */
+  fotoDataUrl?: string | null;
   coordenadasEntrada: { lat: number; lng: number } | null;
   coordenadasSalida: { lat: number; lng: number } | null;
   duracionMinutos: number;
-  horasTrabajadas: number;   // decimal, ej: 8.5
-  horasExtra: number;        // calculado por el backend o localmente
-  valorHorasExtra: number;   // calculado por el backend
+  horasTrabajadas: number;
+  horasExtra: number;
+  valorHorasExtra: number;
   sincronizado: boolean;
 }
 
@@ -60,33 +54,44 @@ export interface JornadaRegistro {
 const KEY_ACTIVA    = 'jornada_activa';
 const KEY_HISTORIAL = 'jornadas_historial';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers localStorage ────────────────────────────────────────────────────
 
-function leerActiva(): JornadaActiva | null {
+/** Lo que realmente se persiste en localStorage (sin dataUrl) */
+type JornadaActivaStorage = Omit<JornadaActiva, 'fotoDataUrl'>;
+type JornadaRegistroStorage = Omit<JornadaRegistro, 'fotoDataUrl'>;
+
+function leerActiva(): JornadaActivaStorage | null {
   try {
     const raw = localStorage.getItem(KEY_ACTIVA);
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 }
 
-function leerHistorial(): JornadaRegistro[] {
+function leerHistorial(): JornadaRegistroStorage[] {
   try {
     const raw = localStorage.getItem(KEY_HISTORIAL);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
 
-function guardarActiva(j: JornadaActiva | null) {
-  if (j === null) localStorage.removeItem(KEY_ACTIVA);
-  else localStorage.setItem(KEY_ACTIVA, JSON.stringify(j));
+function guardarActiva(j: JornadaActivaStorage | null) {
+  if (j === null) {
+    localStorage.removeItem(KEY_ACTIVA);
+  } else {
+    // Nunca guardar fotoDataUrl en localStorage
+    const { fotoDataUrl: _, ...sinFoto } = j as any;
+    localStorage.setItem(KEY_ACTIVA, JSON.stringify(sinFoto));
+  }
 }
 
-function guardarHistorial(h: JornadaRegistro[]) {
-  localStorage.setItem(KEY_HISTORIAL, JSON.stringify(h));
+function guardarHistorial(h: JornadaRegistroStorage[]) {
+  // Nunca guardar fotoDataUrl en localStorage
+  const limpio = h.map(({ fotoDataUrl: _, ...rest }: any) => rest);
+  localStorage.setItem(KEY_HISTORIAL, JSON.stringify(limpio));
 }
 
 function uid() {
-  return `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  return `foto_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
 function isoToHHMMSS(iso: string): string {
@@ -103,33 +108,84 @@ function minutosEntre(inicio: string, fin: string): number {
   );
 }
 
+// ─── Helpers IndexedDB ───────────────────────────────────────────────────────
+
+async function guardarFoto(dataUrl: string): Promise<string> {
+  const id = uid();
+  await db.fotos.put({ id, dataUrl, createdAt: Date.now() });
+  return id;
+}
+
+async function leerFoto(id: string | null): Promise<string | null> {
+  if (!id) return null;
+  try {
+    const entry = await db.fotos.get(id);
+    return entry?.dataUrl ?? null;
+  } catch { return null; }
+}
+
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function useJornadaLocal() {
-  const [jornadaActiva, setJornadaActiva] = useState<JornadaActiva | null>(leerActiva);
-  const [historial, setHistorial]         = useState<JornadaRegistro[]>(leerHistorial);
+  const [jornadaActiva, setJornadaActiva] = useState<JornadaActiva | null>(null);
+  const [historial, setHistorial]         = useState<JornadaRegistro[]>([]);
   const [ultimaJornada, setUltimaJornada] = useState<JornadaRegistro | null>(null);
   const [syncError, setSyncError]         = useState<string | null>(null);
+  const [listo, setListo]                 = useState(false);
 
-  useEffect(() => { guardarActiva(jornadaActiva); }, [jornadaActiva]);
-  useEffect(() => { guardarHistorial(historial); }, [historial]);
+  // Al montar: leer localStorage y resolver fotos desde IndexedDB
+  useEffect(() => {
+    async function cargar() {
+      const activa = leerActiva();
+      if (activa) {
+        const fotoDataUrl = await leerFoto(activa.fotoId);
+        setJornadaActiva({ ...activa, fotoDataUrl });
+      }
+
+      const hist = leerHistorial();
+      const histConFotos = await Promise.all(
+        hist.map(async (j) => ({
+          ...j,
+          fotoDataUrl: await leerFoto(j.fotoId),
+        }))
+      );
+      setHistorial(histConFotos);
+      setListo(true);
+    }
+    cargar();
+  }, []);
+
+  // Persistir jornada activa en localStorage cuando cambia (sin la foto)
+  useEffect(() => {
+    if (!listo) return;
+    guardarActiva(jornadaActiva);
+  }, [jornadaActiva, listo]);
+
+  // Persistir historial en localStorage cuando cambia (sin las fotos)
+  useEffect(() => {
+    if (!listo) return;
+    guardarHistorial(historial);
+  }, [historial, listo]);
 
   /**
    * PASO 1 — Inicia la jornada.
-   * Guarda localmente y luego intenta sincronizar con el backend.
-   * Si el backend falla, la jornada queda guardada offline (sincronizado: false).
+   * Guarda la foto en IndexedDB, el resto en localStorage.
+   * Intenta sincronizar con el backend.
    */
   const iniciarJornada = async (
-    foto: string | null,
+    fotoDataUrl: string | null,
     coords: { lat: number; lng: number } | null,
     idEmpleado: string | null = null
   ): Promise<JornadaActiva> => {
     const ahora = new Date().toISOString();
 
-    // Guardar localmente primero (offline-first)
+    // Guardar foto en IndexedDB (no en localStorage)
+    const fotoId = fotoDataUrl ? await guardarFoto(fotoDataUrl) : null;
+
     const nueva: JornadaActiva = {
       horaEntrada: ahora,
-      fotoEntrada: foto,
+      fotoId,
+      fotoDataUrl,   // solo en memoria
       coordenadasEntrada: coords,
       idEmpleado,
       idBackend: null,
@@ -144,16 +200,15 @@ export function useJornadaLocal() {
           id_empleado: idEmpleado,
           fecha: isoToYYYYMMDD(ahora),
           hora_entrada: isoToHHMMSS(ahora),
-          ...(foto && { foto_entrada: foto }),
+          // La foto se sube por separado a Supabase Storage en el futuro
+          // Por ahora no enviamos el dataUrl al backend
           ...(coords && { lat_entrada: coords.lat, lng_entrada: coords.lng }),
         };
         const respuesta = await marcarEntrada(dto);
-        // Actualizar con el id del backend
         const conBackend: JornadaActiva = { ...nueva, idBackend: Number(respuesta.id) };
         setJornadaActiva(conBackend);
         return conBackend;
       } catch (err: any) {
-        // Fallo de red → continuar offline
         setSyncError('Sin conexión. La jornada se sincronizará luego.');
         console.warn('[useJornadaLocal] No se pudo sincronizar entrada:', err.message);
       }
@@ -164,8 +219,6 @@ export function useJornadaLocal() {
 
   /**
    * PASO 2 — Finaliza la jornada activa.
-   * Si hay idBackend: llama a PATCH /api/jornadas/:id/salida.
-   * Si no hay idBackend (offline): guarda localmente con sincronizado: false.
    */
   const finalizarJornada = async (
     coords: { lat: number; lng: number } | null = null,
@@ -176,17 +229,15 @@ export function useJornadaLocal() {
     const ahora   = new Date().toISOString();
     const minutos = minutosEntre(jornadaActiva.horaEntrada, ahora);
 
-    // Registro base (calculado localmente)
     const registroBase: JornadaRegistro = {
-      id: jornadaActiva.idBackend
-        ? String(jornadaActiva.idBackend)
-        : uid(),
+      id: jornadaActiva.idBackend ? String(jornadaActiva.idBackend) : uid(),
       idBackend: jornadaActiva.idBackend,
       idEmpleado: jornadaActiva.idEmpleado,
       fecha: isoToYYYYMMDD(jornadaActiva.horaEntrada),
       horaEntrada: isoToHHMMSS(jornadaActiva.horaEntrada),
       horaSalida: isoToHHMMSS(ahora),
-      fotoEntrada: jornadaActiva.fotoEntrada,
+      fotoId: jornadaActiva.fotoId,
+      fotoDataUrl: jornadaActiva.fotoDataUrl,
       coordenadasEntrada: jornadaActiva.coordenadasEntrada,
       coordenadasSalida: coords,
       duracionMinutos: minutos,
@@ -198,7 +249,6 @@ export function useJornadaLocal() {
 
     let registroFinal = registroBase;
 
-    // Intentar sincronizar salida con el backend
     if (jornadaActiva.idBackend) {
       try {
         const dto: MarcarSalidaDto = {
@@ -207,7 +257,6 @@ export function useJornadaLocal() {
           ...(coords && { lat_salida: coords.lat, lng_salida: coords.lng }),
         };
         const respuesta = await marcarSalida(jornadaActiva.idBackend, dto);
-        // Enriquecer con los datos calculados por el backend
         registroFinal = {
           ...registroBase,
           horasTrabajadas: respuesta.horas_trabajadas ?? registroBase.horasTrabajadas,
@@ -228,8 +277,7 @@ export function useJornadaLocal() {
   };
 
   /**
-   * Sincroniza todos los registros pendientes (sincronizado: false).
-   * Llamar cuando se detecte que hay conexión (useNetwork).
+   * Sincroniza todos los registros pendientes.
    */
   const sincronizarPendientes = async () => {
     const pendientes = historial.filter((j) => !j.sincronizado);
@@ -240,12 +288,10 @@ export function useJornadaLocal() {
     for (const jornada of pendientes) {
       try {
         if (!jornada.idBackend && jornada.idEmpleado) {
-          // Nunca se sincronizó la entrada → POST entrada
           const dtoEntrada: MarcarEntradaDto = {
             id_empleado: jornada.idEmpleado,
             fecha: jornada.fecha,
             hora_entrada: jornada.horaEntrada,
-            ...(jornada.fotoEntrada && { foto_entrada: jornada.fotoEntrada }),
             ...(jornada.coordenadasEntrada && {
               lat_entrada: jornada.coordenadasEntrada.lat,
               lng_entrada: jornada.coordenadasEntrada.lng,
@@ -254,7 +300,6 @@ export function useJornadaLocal() {
           const respEntrada = await marcarEntrada(dtoEntrada);
           const idBackend   = Number(respEntrada.id);
 
-          // PATCH salida con el id recién obtenido
           const dtoSalida: MarcarSalidaDto = {
             hora_salida: jornada.horaSalida,
             ...(jornada.coordenadasSalida && {
@@ -277,7 +322,6 @@ export function useJornadaLocal() {
             };
           }
         } else if (jornada.idBackend) {
-          // Entrada sincronizada pero salida no → solo PATCH salida
           const dtoSalida: MarcarSalidaDto = {
             hora_salida: jornada.horaSalida,
             ...(jornada.coordenadasSalida && {
@@ -299,7 +343,7 @@ export function useJornadaLocal() {
           }
         }
       } catch (err: any) {
-        console.warn('[useJornadaLocal] Error sincronizando jornada:', jornada.id, err.message);
+        console.warn('[useJornadaLocal] Error sincronizando:', jornada.id, err.message);
       }
     }
 
@@ -307,12 +351,8 @@ export function useJornadaLocal() {
     setSyncError(null);
   };
 
-  /** Cancela la jornada activa sin guardar */
-  const cancelarJornada = () => {
-    setJornadaActiva(null);
-  };
+  const cancelarJornada = () => setJornadaActiva(null);
 
-  /** Elimina un registro del historial local */
   const eliminarRegistro = (id: string) => {
     setHistorial((prev) => prev.filter((j) => j.id !== id));
   };
@@ -322,6 +362,7 @@ export function useJornadaLocal() {
     historial,
     ultimaJornada,
     syncError,
+    listo,
     iniciarJornada,
     finalizarJornada,
     cancelarJornada,

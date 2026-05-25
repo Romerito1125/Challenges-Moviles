@@ -3,6 +3,7 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 
 import { AuthProvider } from "./context/AuthContext";
+import { JornadaProvider } from "./context/JornadaContext";
 
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
@@ -53,6 +54,7 @@ const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <AuthProvider>
+        <JornadaProvider>
 
         <IonRouterOutlet>
           <Route path="/login" component={Login} exact />
@@ -75,6 +77,7 @@ const App: React.FC = () => (
           <Redirect exact from="/" to="/login" />
         </IonRouterOutlet>
 
+        </JornadaProvider>
       </AuthProvider>
     </IonReactRouter>
   </IonApp>

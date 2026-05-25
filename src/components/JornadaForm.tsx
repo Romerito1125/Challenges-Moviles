@@ -1,11 +1,16 @@
 import { IonItem, IonLabel, IonInput, IonButton, IonSpinner } from '@ionic/react';
 import { useState, useEffect } from 'react';
-import { CreateJornadaDto } from '../api/jornadaService';
+import { UpdateJornadaDto } from '../api/jornadaService';
 
-type FormData = Omit<CreateJornadaDto, 'id_empleado'>;
+// El formulario admin maneja jornadas completas (entrada + salida)
+type FormData = {
+  fecha: string;
+  hora_entrada: string;
+  hora_salida: string;
+  descanso_horas: number;
+};
 
 interface Props {
-  /** Pre-rellena el formulario al editar */
   initial?: FormData;
   isPending?: boolean;
   error?: string | null;

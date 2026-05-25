@@ -6,15 +6,19 @@ import {
   IonAlert,
   IonList,
   IonButton,
+  IonIcon,
 } from '@ionic/react';
+import { arrowBackOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 import useEmployees from '../hooks/useEmployees';
 import { Employee } from '../api/employeeService';
 import EmployeeItem from '../components/EmployeeItem';
 import EmployeeForm from '../components/EmployeeForm';
 
-type EmployeeFormData = Omit<Employee, 'id' | 'created_at' | 'updated_at'>;
+type EmployeeFormData = Omit<Employee, 'id' | 'auth_user_id' | 'activo' | 'created_at' | 'updated_at'>;
 
 export default function EmployeesAdmin() {
+  const history = useHistory();
   const { employees, isPending, error, fetchAll, add, update, remove } = useEmployees();
 
   const [showForm, setShowForm]           = useState(false);
@@ -54,7 +58,23 @@ export default function EmployeesAdmin() {
     <IonPage>
       <IonContent>
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Empleados</h1>
+
+          {/* Header con regreso */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, paddingTop: 8 }}>
+            <button
+              onClick={() => history.goBack()}
+              style={{
+                width: 36, height: 36, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', flexShrink: 0,
+              }}
+            >
+              <IonIcon icon={arrowBackOutline} style={{ color: 'white', fontSize: '1.125rem' }} />
+            </button>
+            <h1 className="text-2xl font-bold" style={{ margin: 0 }}>Empleados</h1>
+          </div>
 
           {error && (
             <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-4 text-sm">
@@ -97,8 +117,16 @@ export default function EmployeesAdmin() {
               </div>
               <EmployeeForm
                 initial={editingEmployee
-                  ? { cedula: editingEmployee.cedula, nombre: editingEmployee.nombre, apellido: editingEmployee.apellido, salario: editingEmployee.salario }
+                  ? {
+                      cedula: editingEmployee.cedula,
+                      nombre: editingEmployee.nombre,
+                      apellido: editingEmployee.apellido,
+                      email: editingEmployee.email,
+                      salario: editingEmployee.salario,
+                      rol: editingEmployee.rol,
+                    }
                   : undefined}
+                isEditing={!!editingEmployee}
                 isPending={isPending}
                 error={formError}
                 onSubmit={handleSubmit}

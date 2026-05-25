@@ -17,7 +17,7 @@ import {
 } from '@ionic/react';
 import { useParams } from 'react-router-dom';
 import useJornadas from '../hooks/useJornadas';
-import { Jornada, CreateJornadaDto } from '../api/jornadaService';
+import { Jornada } from '../api/jornadaService';
 import { Employee, getEmployeeById } from '../api/employeeService';
 import JornadaItem from '../components/JornadaItem';
 import JornadaForm from '../components/JornadaForm';
@@ -73,7 +73,14 @@ const EmployeeDetail: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleSubmit = async (data: Omit<CreateJornadaDto, 'id_empleado'>) => {
+  type JornadaFormData = {
+    fecha: string;
+    hora_entrada: string;
+    hora_salida: string;
+    descanso_horas: number;
+  };
+
+  const handleSubmit = async (data: JornadaFormData) => {
     setFormError(null);
     const result = editingJornada
       ? await update(editingJornada.id!, data, id)
@@ -224,7 +231,7 @@ const EmployeeDetail: React.FC = () => {
                   ? {
                       fecha: editingJornada.fecha,
                       hora_entrada: editingJornada.hora_entrada,
-                      hora_salida: editingJornada.hora_salida,
+                      hora_salida: editingJornada.hora_salida ?? '',
                       descanso_horas: editingJornada.descanso_horas,
                     }
                   : undefined}

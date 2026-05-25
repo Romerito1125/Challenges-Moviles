@@ -1,9 +1,19 @@
 import Dexie from "dexie";
+import type { EntityTable } from "dexie";
 
-const db = new Dexie("MiAppDB");
+export interface FotoEntry {
+  id: string;
+  dataUrl: string;
+  createdAt: number;
+}
 
-db.version(1).stores({
-    frutas: "++id, nombre, createdAt",
+const db = new Dexie("MiAppDB") as Dexie & {
+  fotos: EntityTable<FotoEntry, "id">;
+};
+
+db.version(2).stores({
+  frutas: "++id, nombre, createdAt",
+  fotos:  "id, createdAt",
 });
 
 export default db;
