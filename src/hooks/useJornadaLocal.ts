@@ -95,17 +95,34 @@ function uid() {
 }
 
 function isoToHHMMSS(iso: string): string {
-  return new Date(iso).toTimeString().slice(0, 8);
+  const d = new Date(iso);
+  // Usar hora local explícita para evitar desfase por zona horaria
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  const s = String(d.getSeconds()).padStart(2, '0');
+  return `${h}:${m}:${s}`;
 }
 
 function isoToYYYYMMDD(iso: string): string {
-  return new Date(iso).toISOString().slice(0, 10);
+  const d = new Date(iso);
+  // Usar fecha local explícita para evitar que UTC cambie el día
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${mo}-${day}`;
 }
 
 function minutosEntre(inicio: string, fin: string): number {
-  return Math.round(
-    (new Date(fin).getTime() - new Date(inicio).getTime()) / 60000
-  );
+  const tsInicio = new Date(inicio).getTime();
+  const tsFin    = new Date(fin).getTime();
+
+  // Guardia: si alguno es inválido o el resultado es negativo/absurdo, devolver 0
+  if (isNaN(tsInicio) || isNaN(tsFin) || tsFin <= tsInicio) return 0;
+
+  const minutos = Math.round((tsFin - tsInicio) / 60000);
+
+  // Guardia: una jornada no puede superar 24 horas (1440 min)
+  return Math.min(minutos, 1440);
 }
 
 // ─── Helpers IndexedDB ───────────────────────────────────────────────────────
