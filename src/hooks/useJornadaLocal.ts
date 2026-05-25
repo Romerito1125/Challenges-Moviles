@@ -217,8 +217,6 @@ export function useJornadaLocal() {
           id_empleado: idEmpleado,
           fecha: isoToYYYYMMDD(ahora),
           hora_entrada: isoToHHMMSS(ahora),
-          // La foto se sube por separado a Supabase Storage en el futuro
-          // Por ahora no enviamos el dataUrl al backend
           ...(coords && { lat_entrada: coords.lat, lng_entrada: coords.lng }),
         };
         const respuesta = await marcarEntrada(dto);
