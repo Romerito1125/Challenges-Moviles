@@ -21,10 +21,10 @@ export default function EmployeesAdmin() {
   const history = useHistory();
   const { employees, isPending, error, fetchAll, add, update, remove } = useEmployees();
 
-  const [showForm, setShowForm]           = useState(false);
+  const [showForm, setShowForm]               = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [deleteTarget, setDeleteTarget]   = useState<Employee | null>(null);
-  const [formError, setFormError]         = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget]       = useState<Employee | null>(null);
+  const [formError, setFormError]             = useState<string | null>(null);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -59,27 +59,19 @@ export default function EmployeesAdmin() {
       <IonContent>
         <div className="p-6">
 
-          {/* Header con regreso */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, paddingTop: 8 }}>
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-5 pt-2">
             <button
               onClick={() => history.goBack()}
-              style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', flexShrink: 0,
-              }}
+              className="w-9 h-9 rounded-full bg-white/8 border border-white/12 flex items-center justify-center cursor-pointer shrink-0"
             >
-              <IonIcon icon={arrowBackOutline} style={{ color: 'white', fontSize: '1.125rem' }} />
+              <IonIcon icon={arrowBackOutline} className="text-white text-lg" />
             </button>
-            <h1 className="text-2xl font-bold" style={{ margin: 0 }}>Empleados</h1>
+            <h1 className="text-2xl font-bold m-0">Empleados</h1>
           </div>
 
           {error && (
-            <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-4 text-sm">
-              {error}
-            </div>
+            <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-4 text-sm">{error}</div>
           )}
 
           <IonButton expand="block" onClick={openCreate} className="mb-4">
@@ -107,9 +99,10 @@ export default function EmployeesAdmin() {
           )}
         </div>
 
+        {/* Modal formulario */}
         {showForm && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-            <div className="rounded-2xl w-full max-w-sm shadow-xl overflow-hidden" style={{ background: '#1e293b' }}>
+            <div className="bg-slate-800 rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
               <div className="px-5 pt-5 pb-1">
                 <h2 className="text-lg font-bold text-slate-100">
                   {editingEmployee ? 'Editar empleado' : 'Nuevo empleado'}

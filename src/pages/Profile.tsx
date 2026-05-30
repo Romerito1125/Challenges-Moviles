@@ -15,8 +15,6 @@ import { useAuthContext } from '../context/AuthContext';
 import { getMyProfile } from '../api/employeeService';
 import { Employee } from '../api/employeeService';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function getInitials(nombre: string, apellido: string): string {
   return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
 }
@@ -29,68 +27,36 @@ function formatSalario(salario: number): string {
   }).format(salario);
 }
 
-// ─── Subcomponente fila de info ───────────────────────────────────────────────
-
 function InfoRow({
   icon,
   label,
   value,
   iconColor = '#60a5fa',
   iconBg = 'rgba(59,130,246,0.15)',
+  last = false,
 }: {
   icon: string;
   label: string;
   value: string;
   iconColor?: string;
   iconBg?: string;
+  last?: boolean;
 }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-        padding: '16px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-      }}
-    >
+    <div className={`flex items-center gap-4 px-5 py-4 ${last ? '' : 'border-b border-white/7'}`}>
       <div
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
-          background: iconBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
+        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: iconBg }}
       >
         <IonIcon icon={icon} style={{ color: iconColor, fontSize: '1.25rem' }} />
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ color: '#64748b', fontSize: '0.75rem', margin: 0, fontWeight: 500 }}>
-          {label}
-        </p>
-        <p
-          style={{
-            color: '#f1f5f9',
-            fontSize: '0.9375rem',
-            margin: '2px 0 0',
-            fontWeight: 500,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {value}
-        </p>
+      <div className="flex-1 min-w-0">
+        <p className="text-slate-500 text-xs font-medium m-0">{label}</p>
+        <p className="text-slate-100 text-[0.9375rem] font-medium mt-0.5 m-0 truncate">{value}</p>
       </div>
     </div>
   );
 }
-
-// ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function EmployeeProfile() {
   const history = useHistory();
@@ -113,127 +79,59 @@ export default function EmployeeProfile() {
     }
   };
 
-  useEffect(() => {
-    cargarPerfil();
-  }, []);
+  useEffect(() => { cargarPerfil(); }, []);
 
   const handleLogout = async () => {
     await logout();
     history.replace('/login');
   };
 
-  const rolLabel = employee?.rol === 'admin' ? 'Administrador' : 'Empleado';
-  const rolColor = employee?.rol === 'admin' ? '#f59e0b' : '#4ade80';
-  const rolBg    = employee?.rol === 'admin' ? 'rgba(245,158,11,0.15)' : 'rgba(34,197,94,0.15)';
+  const isAdmin   = employee?.rol === 'admin';
+  const rolLabel  = isAdmin ? 'Administrador' : 'Empleado';
+  const rolColor  = isAdmin ? '#f59e0b' : '#4ade80';
+  const rolBg     = isAdmin ? 'rgba(245,158,11,0.15)' : 'rgba(34,197,94,0.15)';
 
   return (
     <IonPage style={{ '--background': '#020617', background: '#020617' }}>
       <IonContent fullscreen style={{ '--background': '#020617' }}>
-        <div
-          style={{
-            minHeight: '100%',
-            background: 'linear-gradient(to bottom right, #0f172a, #020617, #000)',
-            color: 'white',
-            paddingBottom: 40,
-          }}
-        >
+        <div className="min-h-full bg-linear-to-br from-slate-900 via-slate-950 to-black text-white pb-10">
+
           {/* Header */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '48px 24px 24px',
-            }}
-          >
+          <div className="flex items-center justify-between px-6 pt-12 pb-6">
             <button
               onClick={() => history.goBack()}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
+              className="w-10 h-10 rounded-full bg-white/8 border border-white/10 flex items-center justify-center cursor-pointer"
             >
-              <IonIcon icon={arrowBackOutline} style={{ color: 'white', fontSize: '1.25rem' }} />
+              <IonIcon icon={arrowBackOutline} className="text-white text-xl" />
             </button>
 
-            <h1 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>Mi Perfil</h1>
+            <h1 className="text-lg font-bold m-0">Mi Perfil</h1>
 
             <button
               onClick={cargarPerfil}
               disabled={loading}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.5 : 1,
-              }}
+              className="w-10 h-10 rounded-full bg-white/8 border border-white/10 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <IonIcon icon={refreshOutline} style={{ color: 'white', fontSize: '1.125rem' }} />
+              <IonIcon icon={refreshOutline} className="text-white text-lg" />
             </button>
           </div>
 
           {/* Loading */}
           {loading && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '80px 24px',
-                gap: 16,
-              }}
-            >
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
               <IonSpinner name="crescent" style={{ color: '#3b82f6', width: 40, height: 40 }} />
-              <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>
-                Cargando perfil...
-              </p>
+              <p className="text-slate-500 text-sm m-0">Cargando perfil...</p>
             </div>
           )}
 
           {/* Error */}
           {!loading && error && (
-            <div style={{ padding: '0 24px' }}>
-              <div
-                style={{
-                  background: 'rgba(239,68,68,0.1)',
-                  border: '1px solid rgba(239,68,68,0.3)',
-                  borderRadius: 16,
-                  padding: '20px 24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 12,
-                  textAlign: 'center',
-                }}
-              >
-                <p style={{ color: '#f87171', fontSize: '0.875rem', margin: 0 }}>
-                  {error}
-                </p>
+            <div className="px-6">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-2xl px-6 py-5 flex flex-col items-center gap-3 text-center">
+                <p className="text-red-400 text-sm m-0">{error}</p>
                 <button
                   onClick={cargarPerfil}
-                  style={{
-                    padding: '8px 20px',
-                    background: 'rgba(59,130,246,0.2)',
-                    border: '1px solid rgba(59,130,246,0.4)',
-                    borderRadius: 10,
-                    color: '#60a5fa',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                  }}
+                  className="px-5 py-2 bg-blue-500/20 border border-blue-500/40 rounded-xl text-blue-400 text-sm cursor-pointer"
                 >
                   Reintentar
                 </button>
@@ -243,53 +141,27 @@ export default function EmployeeProfile() {
 
           {/* Contenido */}
           {!loading && employee && (
-            <div style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div className="px-6 flex flex-col gap-5">
 
               {/* Avatar + nombre */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 12,
-                  paddingBottom: 8,
-                }}
-              >
-                {/* Avatar con iniciales */}
+              <div className="flex flex-col items-center gap-3 pb-2">
                 <div
+                  className="w-22 h-22 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-[0_8px_32px_rgba(59,130,246,0.4)]"
                   style={{
                     width: 88,
                     height: 88,
-                    borderRadius: '50%',
                     background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '2rem',
-                    fontWeight: 700,
-                    color: 'white',
-                    boxShadow: '0 8px 32px rgba(59,130,246,0.4)',
                   }}
                 >
                   {getInitials(employee.nombre, employee.apellido)}
                 </div>
-
-                <div style={{ textAlign: 'center' }}>
-                  <h2 style={{ fontSize: '1.375rem', fontWeight: 700, margin: 0 }}>
+                <div className="text-center">
+                  <h2 className="text-[1.375rem] font-bold m-0">
                     {employee.nombre} {employee.apellido}
                   </h2>
-                  {/* Badge de rol */}
                   <span
-                    style={{
-                      display: 'inline-block',
-                      marginTop: 6,
-                      padding: '3px 12px',
-                      borderRadius: 20,
-                      background: rolBg,
-                      color: rolColor,
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                    }}
+                    className="inline-block mt-1.5 px-3 py-0.5 rounded-full text-xs font-semibold"
+                    style={{ background: rolBg, color: rolColor }}
                   >
                     {rolLabel}
                   </span>
@@ -297,14 +169,7 @@ export default function EmployeeProfile() {
               </div>
 
               {/* Tarjeta de datos */}
-              <div
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 20,
-                  overflow: 'hidden',
-                }}
-              >
+              <div className="bg-white/4 border border-white/8 rounded-2xl overflow-hidden">
                 <InfoRow
                   icon={personOutline}
                   label="Nombre completo"
@@ -333,57 +198,30 @@ export default function EmployeeProfile() {
                   iconColor="#4ade80"
                   iconBg="rgba(34,197,94,0.15)"
                 />
-                <div style={{ borderBottom: 'none' }}>
-                  <InfoRow
-                    icon={shieldCheckmarkOutline}
-                    label="Rol"
-                    value={rolLabel}
-                    iconColor={rolColor}
-                    iconBg={rolBg}
-                  />
-                </div>
+                <InfoRow
+                  icon={shieldCheckmarkOutline}
+                  label="Rol"
+                  value={rolLabel}
+                  iconColor={rolColor}
+                  iconBg={rolBg}
+                  last
+                />
               </div>
 
               {/* Info de sesión */}
               {user && (
-                <div
-                  style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 16,
-                    padding: '14px 20px',
-                  }}
-                >
-                  <p style={{ color: '#475569', fontSize: '0.75rem', margin: '0 0 4px', fontWeight: 500 }}>
-                    Sesión activa
-                  </p>
-                  <p style={{ color: '#64748b', fontSize: '0.8125rem', margin: 0 }}>
-                    {user.email}
-                  </p>
+                <div className="bg-white/3 border border-white/6 rounded-2xl px-5 py-3.5">
+                  <p className="text-slate-500 text-xs font-medium m-0 mb-1">Sesión activa</p>
+                  <p className="text-slate-500 text-[0.8125rem] m-0">{user.email}</p>
                 </div>
               )}
 
               {/* Botón cerrar sesión */}
               <button
                 onClick={handleLogout}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 10,
-                  padding: '16px 24px',
-                  background: 'rgba(239,68,68,0.1)',
-                  border: '1px solid rgba(239,68,68,0.25)',
-                  borderRadius: 16,
-                  color: '#f87171',
-                  fontWeight: 600,
-                  fontSize: '0.9375rem',
-                  cursor: 'pointer',
-                  marginTop: 4,
-                }}
+                className="w-full flex items-center justify-center gap-2.5 px-6 py-4 bg-red-500/10 border border-red-500/25 rounded-2xl text-red-400 font-semibold text-[0.9375rem] cursor-pointer mt-1"
               >
-                <IonIcon icon={logOutOutline} style={{ fontSize: '1.25rem' }} />
+                <IonIcon icon={logOutOutline} className="text-xl" />
                 Cerrar sesión
               </button>
             </div>

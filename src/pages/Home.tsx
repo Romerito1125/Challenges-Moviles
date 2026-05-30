@@ -100,140 +100,70 @@ export default function EmployeeHome() {
     : null;
 
   return (
-    <IonPage style={{ '--background': '#020617', background: '#020617' }}>
+    <IonPage style={{ "--background": "#020617", background: "#020617" }}>
       <IonContent fullscreen style={{ "--background": "#020617" }}>
-        <div
-          style={{
-            minHeight: "100%",
-            background: "linear-gradient(to bottom right, #0f172a, #020617, #000000)",
-            color: "white",
-            padding: "24px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            paddingBottom: "40px",
-          }}
-        >
+        {/* Contenedor principal */}
+        <div className="min-h-full bg-linear-to-br from-slate-900 via-slate-950 to-black text-white p-6 flex flex-col gap-6 pb-10">
+
           {/* Título */}
           <div>
-            <h1 style={{ fontSize: "1.875rem", fontWeight: 700, margin: 0 }}>
-              Registro de Jornada
-            </h1>
-            <p style={{ color: "#9ca3af", fontSize: "0.875rem", marginTop: 4 }}>
+            <h1 className="text-3xl font-bold m-0">Registro de Jornada</h1>
+            <p className="text-gray-400 text-sm mt-1">
               Control de asistencia en tiempo real
             </p>
           </div>
 
           {/* Estado y reloj */}
-          <div
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 16,
-              padding: 20,
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+            <div className="flex justify-between items-center">
               <div>
-                <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0 }}>Estado actual</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                <p className="text-gray-400 text-sm m-0">Estado actual</p>
+                <div className="flex items-center gap-2 mt-1">
                   <span
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: jornadaActiva ? "#22c55e" : "#6b7280",
-                      display: "inline-block",
-                    }}
+                    className={`w-2 h-2 rounded-full inline-block ${
+                      jornadaActiva ? "bg-green-500" : "bg-gray-500"
+                    }`}
                   />
                   <p
-                    style={{
-                      fontWeight: 600,
-                      margin: 0,
-                      color: jornadaActiva ? "#4ade80" : "#9ca3af",
-                    }}
+                    className={`font-semibold m-0 ${
+                      jornadaActiva ? "text-green-400" : "text-gray-400"
+                    }`}
                   >
                     {jornadaActiva ? "Jornada en curso" : "Sin jornada activa"}
                   </p>
                 </div>
               </div>
-              <div
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: "50%",
-                  background: "rgba(34,197,94,0.1)",
-                  border: "1px solid rgba(34,197,94,0.2)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.5rem",
-                }}
-              >
+              <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-2xl">
                 📍
               </div>
             </div>
 
-            <div
-              style={{
-                borderTop: "1px solid rgba(255,255,255,0.1)",
-                margin: "16px 0",
-              }}
-            />
+            <div className="border-t border-white/10 my-4" />
 
             <div>
-              <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0 }}>
-                Hora actual (Colombia)
-              </p>
-              <p style={{ fontSize: "1.875rem", fontWeight: 700, margin: "4px 0 0" }}>{time}</p>
-              <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0, textTransform: "capitalize" }}>
-                {date}
-              </p>
+              <p className="text-gray-400 text-sm m-0">Hora actual (Colombia)</p>
+              <p className="text-3xl font-bold mt-1 mb-0">{time}</p>
+              <p className="text-gray-400 text-sm m-0 capitalize">{date}</p>
             </div>
           </div>
 
           {/* Cronómetro — solo si hay jornada activa */}
           {jornadaActiva && (
-            <div
-              style={{
-                background: "rgba(34,197,94,0.1)",
-                border: "1px solid rgba(34,197,94,0.2)",
-                borderRadius: 16,
-                padding: 20,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              <p style={{ color: "#4ade80", fontSize: "0.875rem", fontWeight: 500, margin: 0 }}>
+            <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-5 flex flex-col items-center gap-1">
+              <p className="text-green-400 text-sm font-medium m-0">
                 Tiempo trabajado
               </p>
-              <p
-                style={{
-                  fontSize: "2.25rem",
-                  fontWeight: 700,
-                  fontFamily: "monospace",
-                  margin: 0,
-                }}
-              >
+              <p className="text-4xl font-bold font-mono m-0">
                 {formatCronometro(segundos)}
               </p>
-              <p style={{ color: "#9ca3af", fontSize: "0.75rem", margin: 0 }}>
+              <p className="text-gray-400 text-xs m-0">
                 Entrada: {horaEntradaFormateada}
               </p>
               {jornadaActiva.fotoDataUrl && (
                 <img
                   src={jornadaActiva.fotoDataUrl}
                   alt="Foto de entrada"
-                  style={{
-                    marginTop: 8,
-                    width: 56,
-                    height: 56,
-                    borderRadius: 12,
-                    objectFit: "cover",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
+                  className="mt-2 w-14 h-14 rounded-xl object-cover border border-white/10"
                 />
               )}
             </div>
@@ -243,40 +173,23 @@ export default function EmployeeHome() {
           <button
             onClick={handleMarcarEntrada}
             disabled={!!jornadaActiva}
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              padding: "16px 24px",
-              background: jornadaActiva
-                ? "rgba(59,130,246,0.3)"
-                : "linear-gradient(to right, #2563eb, #3b82f6)",
-              border: "none",
-              borderRadius: 16,
-              cursor: jornadaActiva ? "not-allowed" : "pointer",
-              opacity: jornadaActiva ? 0.5 : 1,
-              boxShadow: "0 10px 25px rgba(30,64,175,0.3)",
-            }}
+            className={`w-full flex items-center gap-4 px-6 py-4 border-none rounded-2xl transition-opacity shadow-[0_10px_25px_rgba(30,64,175,0.3)] ${
+              jornadaActiva
+                ? "bg-blue-500/30 opacity-50 cursor-not-allowed"
+                : "bg-linear-to-r from-blue-600 to-blue-500 cursor-pointer"
+            }`}
           >
-            <div
-              style={{
-                background: "rgba(255,255,255,0.2)",
-                padding: 12,
-                borderRadius: 12,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <IonIcon icon={enterOutline} style={{ color: "white", fontSize: "1.25rem" }} />
+            <div className="bg-white/20 p-3 rounded-xl flex items-center justify-center">
+              <IonIcon icon={enterOutline} className="text-white text-xl" />
             </div>
-            <div style={{ textAlign: "left" }}>
-              <p style={{ color: "white", fontWeight: 600, fontSize: "1.125rem", margin: 0 }}>
+            <div className="text-left">
+              <p className="text-white font-semibold text-lg m-0">
                 Marcar Entrada
               </p>
-              <p style={{ color: "#bfdbfe", fontSize: "0.875rem", margin: 0 }}>
-                {jornadaActiva ? "Ya tienes una jornada activa" : "Registrar inicio de jornada"}
+              <p className="text-blue-200 text-sm m-0">
+                {jornadaActiva
+                  ? "Ya tienes una jornada activa"
+                  : "Registrar inicio de jornada"}
               </p>
             </div>
           </button>
@@ -285,80 +198,47 @@ export default function EmployeeHome() {
           <button
             onClick={handleMarcarSalida}
             disabled={!jornadaActiva}
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              padding: "16px 24px",
-              background: !jornadaActiva
-                ? "rgba(220,38,38,0.3)"
-                : "linear-gradient(to right, #dc2626, #ef4444)",
-              border: "none",
-              borderRadius: 16,
-              cursor: !jornadaActiva ? "not-allowed" : "pointer",
-              opacity: !jornadaActiva ? 0.5 : 1,
-              boxShadow: "0 10px 25px rgba(153,27,27,0.3)",
-            }}
+            className={`w-full flex items-center gap-4 px-6 py-4 border-none rounded-2xl transition-opacity shadow-[0_10px_25px_rgba(153,27,27,0.3)] ${
+              !jornadaActiva
+                ? "bg-red-600/30 opacity-50 cursor-not-allowed"
+                : "bg-linear-to-r from-red-600 to-red-500 cursor-pointer"
+            }`}
           >
-            <div
-              style={{
-                background: "rgba(255,255,255,0.2)",
-                padding: 12,
-                borderRadius: 12,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <IonIcon icon={exitOutline} style={{ color: "white", fontSize: "1.25rem" }} />
+            <div className="bg-white/20 p-3 rounded-xl flex items-center justify-center">
+              <IonIcon icon={exitOutline} className="text-white text-xl" />
             </div>
-            <div style={{ textAlign: "left" }}>
-              <p style={{ color: "white", fontWeight: 600, fontSize: "1.125rem", margin: 0 }}>
+            <div className="text-left">
+              <p className="text-white font-semibold text-lg m-0">
                 Marcar Salida
               </p>
-              <p style={{ color: "#fecaca", fontSize: "0.875rem", margin: 0 }}>
-                {jornadaActiva ? "Registrar fin de jornada" : "No hay jornada activa"}
+              <p className="text-red-200 text-sm m-0">
+                {jornadaActiva
+                  ? "Registrar fin de jornada"
+                  : "No hay jornada activa"}
               </p>
             </div>
           </button>
 
           {/* Resumen rápido */}
-          <div
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 16,
-              padding: 16,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex justify-between items-center">
             <div>
-              <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0 }}>Jornada de hoy</p>
-              <p style={{ fontSize: "0.875rem", margin: "4px 0 0" }}>
+              <p className="text-gray-400 text-sm m-0">Jornada de hoy</p>
+              <p className="text-sm mt-1 mb-0">
                 {jornadaActiva
                   ? `Entrada a las ${horaEntradaFormateada}`
                   : "Aún no has marcado entrada"}
               </p>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0 }}>Tiempo</p>
-              <p style={{ fontSize: "1.25rem", fontWeight: 700, fontFamily: "monospace", margin: 0 }}>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm m-0">Tiempo</p>
+              <p className="text-xl font-bold font-mono m-0">
                 {jornadaActiva ? formatCronometro(segundos) : "00:00:00"}
               </p>
             </div>
           </div>
 
           {/* Navegación rápida */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 8,
-            }}
-          >
+          <div className="grid grid-cols-2 gap-2">
             {[
               { label: "📋 Historial", path: "/employee-history" },
               { label: "👤 Perfil", path: "/profile" },
@@ -368,15 +248,7 @@ export default function EmployeeHome() {
               <button
                 key={path}
                 onClick={() => history.push(path)}
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 12,
-                  padding: "12px 8px",
-                  color: "#d1d5db",
-                  fontSize: "0.875rem",
-                  cursor: "pointer",
-                }}
+                className="bg-white/5 border border-white/10 rounded-xl py-3 px-2 text-gray-300 text-sm cursor-pointer"
               >
                 {label}
               </button>
