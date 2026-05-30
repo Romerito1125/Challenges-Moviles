@@ -244,3 +244,44 @@ El tipo `ApiResponse<T>` en `employeeService.ts` modela este contrato y es usado
 - `firebase/config.ts` está presente pero sin uso activo en la aplicación.
 - `useNetwork` detecta la conectividad pero la sincronización automática de jornadas pendientes debe llamarse manualmente via `sincronizarPendientes()` del contexto de jornada.
 - El campo `auth_user_id` en la tabla `employees` es el vínculo entre Supabase Auth y el registro del empleado. Si ese campo es null, `GET /api/employees/me` devuelve 404 y el empleado no puede marcar jornadas.
+## Sensores y permisos del dispositivo
+
+La aplicación accede a tres sensores del dispositivo a través de los plugins de Capacitor. En web, el navegador solicita los permisos nativos del sistema. En Android, los permisos se declaran en `AndroidManifest.xml` y se solicitan en tiempo de ejecución.
+
+### Cámara
+
+Plugin: `@capacitor/camera`
+Hook: `src/hooks/useCamera.ts`
+
+Se usa exclusivamente en `CameraCapture.tsx` al marcar entrada. El hook llama a `Camera.getPhoto()` con las siguientes opciones:
+
+- `resultType: CameraResultType.DataUrl` — devuelve la imagen como base64 para poder guardarla en IndexedDB sin depender del sistema de archivos.
+- `source: CameraSource.Camera` — fuerza el uso de la cámara en vivo, no la galería.
+- `quality: 80` — compresión JPEG para reducir el tamaño del `dataUrl`.
+
+La foto resultante se pasa a `iniciarJornada()` y se persiste en IndexedDB. Solo se guarda una foto por jornada (la de entrada). No se toma foto al marcar salida.
+
+Permisos requeridos en Android: `CAMERA`.
+
+### Ubicación (GPS)
+
+Plugin: `@capacitor/geolocation`
+Hook: `src/hooks/useGeolocation.ts`
+
+El hook expone tres funciones:
+
+- `getCurrentLocation()` — obtiene una lectura puntual con `Geolocation.getCurrentPosition()`. Se usa en `CameraCapture.tsx` al montar la pantalla para capturar las coordenadas de entrada antes de que el empleado tome la foto.
+- `startTracking()` / `stopTracking()` — inician y detienen un watcher continuo con `Geolocation.watchPosition()`. Están implementados pero no se invocan actualmente desde ninguna pantalla.
+
+Las coordenadas de entrada (`lat`, `lng`) se guardan junto con el registro de jornada en localStorage y se envían al backend en `marcarEntrada`. Se muestran en `JornadaResumen.tsx` y `WorkHistory.tsx` a través del componente `MapaUbicacion`.
+
+Permisos requeridos en Android: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`.
+
+### Red (conectividad)
+
+Plugin: `@capacitor/network`
+Hook: `src/hooks/useNetwork.tsx`
+
+El hook escucha el evento `Network.addListener('networkStatusChange', ...)` y expone el estado actual de la conexión (`isConnected`, `connectionType`). Se usa para mostrar indicadores visuales de conectividad en la UI.
+
+La sincronización automática de jornadas pendientes **no está conectada** a este hook. Cuando la red se recupera, `sincronizarPendientes()` debe llamarse manualmente desde el contexto de jornada. La integración automática está pendiente de implementación.
