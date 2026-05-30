@@ -240,9 +240,6 @@ El tipo `ApiResponse<T>` en `employeeService.ts` modela este contrato y es usado
 ---
 
 ## Notas
-
-- `firebase/config.ts` está presente pero sin uso activo en la aplicación.
-- `useNetwork` detecta la conectividad pero la sincronización automática de jornadas pendientes debe llamarse manualmente via `sincronizarPendientes()` del contexto de jornada.
 - El campo `auth_user_id` en la tabla `employees` es el vínculo entre Supabase Auth y el registro del empleado. Si ese campo es null, `GET /api/employees/me` devuelve 404 y el empleado no puede marcar jornadas.
 ## Sensores y permisos del dispositivo
 
