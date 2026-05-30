@@ -32,42 +32,49 @@ type Step = 'loading' | 'form' | 'success' | 'error';
 export default function SetPassword() {
   const history = useHistory();
 
-  const [step, setStep]           = useState<Step>('loading');
-  const [password, setPassword]   = useState('');
-  const [confirm, setConfirm]     = useState('');
-  const [showPwd, setShowPwd]     = useState(false);
+  const [step, setStep] = useState<Step>('loading');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [errorMsg, setErrorMsg]   = useState<string | null>(null);
-  const [nombre, setNombre]       = useState<string>('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [nombre, setNombre] = useState<string>('');
 
   const sessionReady = useRef(false);
 
   useEffect(() => {
-    /**
-     * Supabase procesa el hash de la URL automáticamente al inicializar.
-     * Escuchamos el evento PASSWORD_RECOVERY o SIGNED_IN con type=invite
-     * para confirmar que el token es válido antes de mostrar el formulario.
-     */
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("EVENTO AUTH:", event);
+      console.log("SESSION AUTH:", session);
+
+      if (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY") {
         sessionReady.current = true;
+
         const meta = session?.user?.user_metadata;
-        setNombre(meta?.nombre ?? '');
-        setStep('form');
+
+        setNombre(meta?.nombre ?? "");
+        setStep("form");
       }
     });
 
-    // Si ya hay sesión activa (recarga de página), mostrar el form directamente
     supabase.auth.getSession().then(({ data }) => {
+      console.log("GET SESSION:", data.session);
+
       if (data.session) {
         sessionReady.current = true;
+
         const meta = data.session.user?.user_metadata;
-        setNombre(meta?.nombre ?? '');
-        setStep('form');
+
+        setNombre(meta?.nombre ?? "");
+        setStep("form");
       } else {
-        // Sin sesión y sin hash → esperar al listener; si no llega en 4s, es token inválido
         setTimeout(() => {
-          if (!sessionReady.current) setStep('error');
+          if (!sessionReady.current) {
+            console.log("NO HAY SESIÓN, MOSTRANDO ERROR");
+            setStep("error");
+          }
         }, 4000);
       }
     });
@@ -241,14 +248,13 @@ export default function SetPassword() {
                 {[1, 2, 3, 4].map((level) => (
                   <div
                     key={level}
-                    className={`h-1 flex-1 rounded-full transition-all ${
-                      password.length >= level * 3
+                    className={`h-1 flex-1 rounded-full transition-all ${password.length >= level * 3
                         ? level <= 1 ? 'bg-red-500'
                           : level <= 2 ? 'bg-yellow-500'
-                          : level <= 3 ? 'bg-blue-500'
-                          : 'bg-green-500'
+                            : level <= 3 ? 'bg-blue-500'
+                              : 'bg-green-500'
                         : 'bg-white/10'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>

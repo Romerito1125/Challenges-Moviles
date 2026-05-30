@@ -2,7 +2,7 @@ import axios from 'axios';
 import { supabase } from '../supabase/client';
 
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'https://backendproyectomoviles.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
