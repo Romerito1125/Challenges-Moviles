@@ -286,3 +286,9 @@ La sincronización automática de jornadas pendientes **no está conectada** a e
 ### Enlace a prototipo:
 
 https://prototipomoviles.lovable.app/
+
+
+### Usuarios de prueba:
+
+Correo: juanpablozuluaga.0311@gmail.com
+Contraseña: juan0311
