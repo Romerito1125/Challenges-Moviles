@@ -285,3 +285,7 @@ Hook: `src/hooks/useNetwork.tsx`
 El hook escucha el evento `Network.addListener('networkStatusChange', ...)` y expone el estado actual de la conexión (`isConnected`, `connectionType`). Se usa para mostrar indicadores visuales de conectividad en la UI.
 
 La sincronización automática de jornadas pendientes **no está conectada** a este hook. Cuando la red se recupera, `sincronizarPendientes()` se hace uso dle mismo.
+
+### Enlace a prototipo:
+
+https://prototipomoviles.lovable.app/
